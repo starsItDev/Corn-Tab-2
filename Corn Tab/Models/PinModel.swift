@@ -22,7 +22,6 @@ struct Welcome {
 //        let urlString = "https://jhh3bgjqhj.execute-api.ap-southeast-1.amazonaws.com/Prod/MultiTenant/GetClientInfo?Pin=\(pin)"
 
 
-
 // This file was generated from JSON Schema using quicktype, do not modify it directly.
 // To parse the JSON, add this file to your project and do:
 //

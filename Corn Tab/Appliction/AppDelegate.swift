@@ -11,7 +11,7 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        print("Asdcfsadv")
+        print("Asdcfsadcxcvzxv")
           UserDefaults.standard.removeObject(forKey: "addedItems")
           UserDefaults.standard.removeObject(forKey: "parsedDataKey")
 //        if let launchOptions = launchOptions,

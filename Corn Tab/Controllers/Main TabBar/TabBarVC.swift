@@ -37,6 +37,8 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
+        
+        print("cxzczxc`")
     }
     override func viewWillAppear(_ animated: Bool) {
         makePOSTRequest()
