@@ -6,6 +6,9 @@ import UIKit
 
 class OrderDetailsVC: UIViewController {
     // MARK: - Outlets
+    
+    @IBOutlet weak var placeOrderBtn: UIButton!
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var orderTakerNameLbl: UILabel!
     @IBOutlet weak var subTotalLbl: UILabel!
@@ -18,6 +21,7 @@ class OrderDetailsVC: UIViewController {
     @IBOutlet weak var orderProductLbl: UILabel!
     @IBOutlet weak var tableCoverNoLbl: UILabel!
     // MARK: - Var
+    var updatedButtonText: String?
     var addedItems: [[String: String]] = []
     var itemCounts: [Int] = []
     var timer: Timer?
@@ -30,6 +34,9 @@ class OrderDetailsVC: UIViewController {
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        placeOrderBtn.setTitle("Place Order", for: .normal)
+        placeOrderBtn.setTitle(updatedButtonText, for: .normal)
+
         tableView.rowHeight = 100
         tableView.reloadData()
         updateDateAndTimeLabels()
@@ -61,13 +68,15 @@ class OrderDetailsVC: UIViewController {
                 title: "No Items",
                 message: "Please add items to your order before placing an order."
             )
-        } else if tableNoLbl.text == "" && tableCoverNoLbl.text == "" {
-            // Use your custom showAlert method to display the alert
-            showAlert(
-                title: "Missing Table Or TableCover",
-                message: "Please Select Table And Select Cover Table Number."
-            )
-        } else {
+        }
+//            else if tableNoLbl.text == "" && tableCoverNoLbl.text == "" {
+//            // Use your custom showAlert method to display the alert
+//            showAlert(
+//                title: "Missing Table Or TableCover",
+//                message: "Please Select Table And Select Cover Table Number."
+//            )
+//        }
+        else {
             print("Next")
             makePOSTRequest()
         }

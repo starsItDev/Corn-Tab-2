@@ -22,6 +22,9 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var pendingOrder: UILabel!
     //MARK: Variables
+    //For refresh page
+    var refreshControl=UIRefreshControl()
+    var orderDetail = [String]()
     var customerIDsString = ""
     var distributionName = ""
     var userName = ""
@@ -37,11 +40,13 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
+        refreshControl.addTarget(self, action: #selector(TabBarVC.refreshPendingRequests), for: .valueChanged)
+collectionView.addSubview(refreshControl)
+        makePOSTRequest()
         
-        print("cxzczxc`")
     }
     override func viewWillAppear(_ animated: Bool) {
-        makePOSTRequest()
+//        makePOSTRequest()
     }
     //MARK: Button Actions
     @IBAction func tableViewBtn(_ sender: UIButton) {
@@ -56,6 +61,9 @@ class TabBarVC: UIViewController {
         tableViewBtn.tintColor = #colorLiteral(red: 0.4576840401, green: 0.4979689717, blue: 0.5107063055, alpha: 1)
         collectionViewBtn.tintColor = #colorLiteral(red: 0.9657021165, green: 0.4859523773, blue: 0.2453393936, alpha: 1)
     }
+    @objc func refreshPendingRequests(_ sender: Any){
+        makePOSTRequest()
+    }
     func startTimer() {
         timer?.invalidate()
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateDateAndTime), userInfo: nil, repeats: true)
@@ -67,16 +75,99 @@ class TabBarVC: UIViewController {
         let dateString = dateFormatter.string(from: currentDate)
         timeLbl.text = dateString
     }
-    @objc func eidtBtnTapped(sender: UIButton) {
-        let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
-        tabBarController?.delegate = self
-        let navigationController = UINavigationController(rootViewController: tabBarController!)
-        navigationController.modalPresentationStyle = .fullScreen
-        if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
-            tabBarController?.selectedIndex = 2
+//    @objc func eidtBtnTapped(sender: UIButton) {
+//        let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
+//        tabBarController?.delegate = self
+//        let navigationController = UINavigationController(rootViewController: tabBarController!)
+//        navigationController.modalPresentationStyle = .fullScreen
+//        if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
+//            tabBarController?.selectedIndex = 2
+//        }
+//        self.present(navigationController, animated: false, completion: nil)
+//    }
+    @objc func eidtBtnTapped(_ sender: UIButton) {
+            let jsonData = self.orderDetail[sender.tag].data(using: .utf8)
+            do {
+                    // Use JSONDecoder to decode the data into an array of OrderItem
+                let orderItems = try JSONDecoder().decode([OrderItem].self, from: jsonData!)
+                    // Now 'orderItems' contains an array of decoded OrderItem objects
+                var savedItems = [[String: String]]()
+                var allOrders = [OrderItem]()
+                var selectedAddOns: [String] = []
+                var selectedAddOnPrices: [Double] = []
+                allOrders = orderItems
+                for i in 0...allOrders.count - 1{
+                    for j in 0...orderItems.count - 1{
+                        if allOrders[i].id == orderItems[j].modifierParentID{
+                            let addOnInfo = "\(orderItems[j].name) (\(orderItems[j].price ?? 0))"
+                            selectedAddOns.append(addOnInfo)
+                            selectedAddOnPrices.append(orderItems[i].price ?? 0)
+                        }
+                    }
+                }
+                let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
+                
+                let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
+                    for orderItem in orderItems {
+                        //print("OrderID: \(orderItem.orderID), Name: \(orderItem.name), Price: \(orderItem.price)")
+                        let totalPrice = Int((orderItem.price ?? 0) + totalAddOnPrice)
+                        if orderItem.isHasAddsOn{
+                            let newItem: [String: String] = [
+                                "title": orderItem.name,
+                                "quantity": "\(Int(orderItem.qty ?? 0))",
+                                "price" : "\(totalPrice)",
+                                "selectedAddOns": "\(selectedAddOnsString)",
+                            ]
+                            
+                            savedItems.append(newItem)
+                        }
+                        else if orderItem.isAddsOn{
+                            
+                        }
+                        else{
+                            let newItem: [String: String] = [
+                                "title": orderItem.name,
+                                "quantity": "\(Int(orderItem.qty ?? 0))",
+                                "price" : "\(orderItem.price ?? 00)",
+                                "selectedAddOns": "",
+                            ]
+                            
+                            savedItems.append(newItem)
+                        }
+                    }
+                
+                UserDefaults.standard.set(savedItems, forKey: "addedItems")
+                } catch {
+                    print("Error decoding JSON: \(error)")
+                }
+            
+//            let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
+//            tabBarController?.delegate = self
+//            let navigationController = UINavigationController(rootViewController: tabBarController!)
+//            navigationController.modalPresentationStyle = .fullScreen
+//            if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
+//                tabBarController?.selectedIndex = 2
+//            }
+//            self.present(navigationController, animated: false, completion: nil)
+//        }
+        // Pass information to the next view controller
+            let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
+
+            // Assuming the next view controller is at index 2 (change it according to your actual setup)
+            if let nextViewController = tabBarController?.viewControllers?[2] as? OrderDetailsVC {
+                nextViewController.updatedButtonText = "Updated Order"
+            }
+
+            tabBarController?.delegate = self
+            let navigationController = UINavigationController(rootViewController: tabBarController!)
+            navigationController.modalPresentationStyle = .fullScreen
+            if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
+                tabBarController?.selectedIndex = 2
+            }
+            
+            // Present the navigation controller
+            self.present(navigationController, animated: false, completion: nil)
         }
-        self.present(navigationController, animated: false, completion: nil)
-    }
 }
 //MARK: Helper function to make POST request
 extension TabBarVC {
@@ -125,6 +216,7 @@ extension TabBarVC {
                         print(date?[1] ?? "")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
+                        self.refreshControl.endRefreshing()
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
                     }
@@ -161,7 +253,9 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
         cell.orderNoLbl.text = rowData.orderNO
         cell.timeLbl.text = rowData.createDateTime
 //        cell.tableNoLbl.text = rowData.tableDetail
-        cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(sender:)), for: .touchUpInside)
+        self.orderDetail.append(rowData.orderDetail ?? "")
+                cell.eidtBtn.tag = indexPath.item
+        cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(_:)), for: .touchUpInside)
         return cell
     }
 }

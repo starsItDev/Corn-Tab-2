@@ -49,21 +49,29 @@ class SelectionVC: UIViewController {
             var sectionNameToID: [String: Int] = [:]
             
             APIManager.makePOSTRequest { dashboardModelArray in
+                guard dashboardModelArray.count > 1 else {
+                    print("Error: dashboardModelArray has insufficient elements.")
+                    loader.stopAnimating()
+                    loader.removeFromSuperview()
+                    return
+                }
+                let rowItemData = dashboardModelArray[1]
+                
                 
 //                self.apiResponse = dashboardModelArray.flatMap { $0 }
-                var rowItemData = dashboardModelArray[1]
-               
-                self.apiResponse = dashboardModelArray.flatMap { $0 }
-
-                       // Retrieve rowItemData
-                       if dashboardModelArray.count > 1 {
-                           rowItemData = dashboardModelArray[1]
-
-                           // Encode and save rowItemData to UserDefaults
-                           if let encodedData = try? JSONEncoder().encode(rowItemData) {
-                               UserDefaults.standard.set(encodedData, forKey: "rowItemData")
-                           }
-                       }
+//                var rowItemData = dashboardModelArray[1]
+//
+//                self.apiResponse = dashboardModelArray.flatMap { $0 }
+//
+//                       // Retrieve rowItemData
+//                       if dashboardModelArray.count > 1 {
+//                           rowItemData = dashboardModelArray[1]
+//
+//                           // Encode and save rowItemData to UserDefaults
+//                           if let encodedData = try? JSONEncoder().encode(rowItemData) {
+//                               UserDefaults.standard.set(encodedData, forKey: "rowItemData")
+//                           }
+//                       }
 
                 
                 for dashboardModel in dashboardModelArray {
@@ -79,20 +87,37 @@ class SelectionVC: UIViewController {
                         }
                     }
                 }
+                
                 DispatchQueue.main.async {
-                    loader.stopAnimating()
+                            loader.stopAnimating()
                             loader.removeFromSuperview()
-                    self.apiResponse = rowItemData
-                    self.segments.removeAllSegments()
-                    self.sectionNameToID = sectionNameToID// Clear existing segments
-                    for (index, sectionName) in self.sectionNames.enumerated() {
-                        self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
+                            self.apiResponse = rowItemData
+                            self.segments.removeAllSegments()
+                            self.sectionNameToID = sectionNameToID
+
+                            for (index, sectionName) in self.sectionNames.enumerated() {
+                                self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
+                            }
+
+                            self.segments.selectedSegmentIndex = 0
+                            self.collectionView.reloadData()
+                        }
                     }
-                    self.segments.selectedSegmentIndex = 0
-                    self.collectionView.reloadData()
                 }
-            }
-        }
+//                DispatchQueue.main.async {
+//                    loader.stopAnimating()
+//                            loader.removeFromSuperview()
+//                    self.apiResponse = rowItemData
+//                    self.segments.removeAllSegments()
+//                    self.sectionNameToID = sectionNameToID// Clear existing segments
+//                    for (index, sectionName) in self.sectionNames.enumerated() {
+//                        self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
+//                    }
+//                    self.segments.selectedSegmentIndex = 0
+//                    self.collectionView.reloadData()
+//                }
+//            }
+//        }
     @IBAction func minusButton(_ sender: UIButton) {
         if let currentItemCount = Int(itemCountTxt.text ?? "0") {
             itemCount = max(0, currentItemCount - 1)
