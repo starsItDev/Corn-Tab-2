@@ -11,8 +11,9 @@ class SelectionVC: UIViewController{
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var itemCountTxt: UITextField!
     @IBOutlet weak var searchBar: UISearchBar!
-    
     @IBOutlet weak var tableView: UITableView!
+    
+    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
     
     //MARK: Var
     var itemCount = 0
@@ -25,7 +26,11 @@ class SelectionVC: UIViewController{
     var sectionNameToID: [String: Int] = [:]
     var selectedTableNumbers: [String] = []
     var selectedIndexPaths: Set<IndexPath> = []
-    let data = ["Item 1", "Item 2", "Item 3", "Item 4"]
+    var isSearchBarActive: Bool = false
+
+    var filteredData: [MasterDetailRow] = []
+    var searchBarValue:[MasterDetailRow] = []
+
     // MARK: View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,8 +39,8 @@ class SelectionVC: UIViewController{
         apiCalling()
         itemCountTxt.keyboardType = .numberPad
         UserDefaults.standard.removeObject(forKey: "SelectedTableIDs")
-        tableView.isHidden = true
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+       tableView.isHidden = true
+//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
     private func setupUI() {
             navigationController?.setNavigationBarHidden(true, animated: false)
@@ -47,7 +52,6 @@ class SelectionVC: UIViewController{
             searchBar.delegate = self
         }
 // MARK: Actions
-    
         func apiCalling(){
             let loader = UIActivityIndicatorView(style: .large)
                 loader.center = view.center
@@ -62,8 +66,10 @@ class SelectionVC: UIViewController{
                     loader.removeFromSuperview()
                     return
                 }
+                self.searchBarValue = dashboardModelArray[0]
                 let rowItemData = dashboardModelArray[1]
-                            
+                
+               
                 for dashboardModel in dashboardModelArray {
                     for row in dashboardModel {
                             if let sectionID = row.floorID, let sectionName = row.floorName {
@@ -74,10 +80,10 @@ class SelectionVC: UIViewController{
                             if let itemID = row.floorID {
                                 self.itemIDToSectionID[itemID] = sectionID
                             }
+                                print(self.searchBarValue)
                         }
                     }
                 }
-                
                 DispatchQueue.main.async {
                             loader.stopAnimating()
                             loader.removeFromSuperview()
@@ -88,13 +94,12 @@ class SelectionVC: UIViewController{
                             for (index, sectionName) in self.sectionNames.enumerated() {
                                 self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
                             }
-
+                            self.tableView.reloadData()
                             self.segments.selectedSegmentIndex = 0
                             self.collectionView.reloadData()
                         }
                     }
                 }
-
     @IBAction func minusButton(_ sender: UIButton) {
         if let currentItemCount = Int(itemCountTxt.text ?? "0") {
             itemCount = max(0, currentItemCount - 1)
@@ -124,34 +129,129 @@ class SelectionVC: UIViewController{
         }
     }
 }
-extension SelectionVC:UITableViewDataSource, UITableViewDelegate  {
-    // MARK: - UITableViewDataSource
+extension SelectionVC: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searchBarIsEmpty() {
+            return searchBarValue.count
+        } else {
+            return filteredData.count
+        }
+    }
 
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return data.count
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SelectionTVCell
+
+        var itemName: String
+        var itemAddress: String
+        var itemContact: String
+
+        if searchBarIsEmpty() {
+            if indexPath.row < searchBarValue.count {
+                itemName = searchBarValue[indexPath.row].customerName ?? "N/A"
+                itemAddress = searchBarValue[indexPath.row].address ?? "N/A"
+                itemContact = searchBarValue[indexPath.row].primaryContact ?? "N/A"
+            } else {
+                itemName = "safdsafdsafadsfdsa"
+                itemAddress = "N/A"
+                itemContact = "N/A"
+            }
+        } else {
+            if indexPath.row < filteredData.count {
+                itemName = filteredData[indexPath.row].customerName ?? "N/allA"
+                itemAddress = filteredData[indexPath.row].address ?? "N/allA"
+                itemContact = filteredData[indexPath.row].primaryContact ?? "N/allA"
+            } else {
+                itemName = "N/A"
+                itemAddress = "N/A"
+                itemContact = "N/A"
+            }
+        }
+                cell.nameLbl.text = searchBarIsEmpty() ? itemName : itemName
+                cell.addressLbl.text = searchBarIsEmpty() ? itemAddress : itemAddress
+                cell.phoneLbl.text = searchBarIsEmpty() ? itemContact : itemContact
+        return cell
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        var selectedCustomerName: String
+        
+        if searchBarIsEmpty() {
+            if indexPath.row < searchBarValue.count {
+                selectedCustomerName = searchBarValue[indexPath.row].customerName ?? "N/A"
+            } else {
+                selectedCustomerName = "N/A"
+            }
+        } else {
+            if indexPath.row < filteredData.count {
+                selectedCustomerName = filteredData[indexPath.row].customerName ?? "N/A"
+            } else {
+                selectedCustomerName = "N/A"
+            }
         }
 
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            cell.textLabel?.text = data[indexPath.row]
-            return cell
-        }
+        
+        searchBar.text = selectedCustomerName
+        tableView.isHidden = true
+    }
 
-        // MARK: - UITableViewDelegate
-
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            // Handle row selection, if needed
-            print("Selected row: \(indexPath.row)")
-        }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
+    }
 }
 //MARK: Extension SearchBar
 extension SelectionVC: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        isSearchBarActive = true
+        tableView.isHidden = false
+    }
+    private func setSearchBarTextAttributes() {
+            let searchBarTextField = searchBar.value(forKey: "searchField") as? UITextField
+
+            // Set the font size to 25
+            searchBarTextField?.font = UIFont.systemFont(ofSize: 25)
+
+            // You can also set other text attributes if needed
+            // searchBarTextField?.textColor = UIColor.yourTextColor
+            // searchBarTextField?.backgroundColor = UIColor.yourBackgroundColor
+        }
+
+        // Call this function where you initialize your search bar, such as in viewDidLoad
+        private func setupSearchBar() {
+            searchBar.delegate = self
+            setSearchBarTextAttributes()
+            // Other setup code for your search bar
+        }
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filterTableView(for: searchText)
     }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    
+        isSearchBarActive = false
+        tableView.isHidden = true
+
+        searchBar.text = nil
+        searchBar.resignFirstResponder()
+        filterTableView(for: "")
+    }
+    private func searchBarIsEmpty() -> Bool {
+        return searchBar.text?.isEmpty ?? true
+    }
+
+    private func filterTableView(for searchText: String) {
+        if searchBarIsEmpty() {
+            tableView.isHidden = true
+        } else {
+            tableView.isHidden = false
+            if isSearchBarActive {
+                filteredData = searchBarValue.filter { $0.customerName?.lowercased().contains(searchText.lowercased()) ?? false }
+            } else {
+                // Show all data when the search bar is not active
+                filteredData = searchBarValue
+            }
+            tableView.reloadData()
+        }
     }
 }
+
+
 //MARK: Collection View
 extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
