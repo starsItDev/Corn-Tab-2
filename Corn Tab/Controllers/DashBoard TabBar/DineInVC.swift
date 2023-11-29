@@ -40,6 +40,7 @@ class DineInVC: UIViewController{
     var receivedSegmentTitle: String?
     var receivedItemCount: String? = nil
     
+    var selectedItemID: Int?
     var selectedItemName: String?
     var selectedItemPrice: String?
     var itemCountinCV = 1
@@ -238,7 +239,7 @@ class DineInVC: UIViewController{
         addOnscollectionView.reloadData()
     }
     @IBAction func minusButton(_ sender: UIButton) {
-        itemCount = max(0, itemCount - 1)
+        itemCount = max(1, itemCount - 1)
         updateItemCountLabel()
     }
     @IBAction func plusButton(_ sender: UIButton) {
@@ -310,6 +311,7 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
             if indexPath.row < validItems.count {
                 let item = validItems[indexPath.row]
                 cell.nameLabel?.text = item.itemName
+                cell.itemId = item.itemID
                 if let price = item.price {
                     cell.priceLabel?.text = "\(price)"
                 }
@@ -401,6 +403,7 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                 selectedItemPrice = cell.priceLabel?.text
                 subViewLbl.text = selectedItemName
                 subViewPriceLbl.text = selectedItemPrice
+                let itemId = cell.itemId ?? 0
                 // Check if there are any matching add-ons
                 let matchingAddOns = apiResponseAddOns.filter { addOnItem in
                     return addOnItem.itemName == selectedItemName
@@ -410,8 +413,10 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                     let newItem: [String: String] = [
                         "itemName": selectedItemName ?? "",
                         "itemPrice": selectedItemPrice ?? "" ,
-                        "itemINCV": String(itemCountinCV)
+                        "itemINCV": String(itemCountinCV),
+                        "ID": String(itemId)
                     ]
+                    
                     var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
                     if let existingItemIndex = savedItems.firstIndex(where: { $0["itemName"] == selectedItemName }) {
                         if let existingItemINCV = Int(savedItems[existingItemIndex]["itemINCV"] ?? "0") {

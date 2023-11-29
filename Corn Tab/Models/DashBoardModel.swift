@@ -1,8 +1,3 @@
-// This file was generated from JSON Schema using quicktype, do not modify it directly.
-// To parse the JSON, add this file to your project and do:
-//
-//   let dashBoardModel = try? JSONDecoder().decode(DashBoardModel.self, from: jsonData)
-
 import Foundation
 
 // MARK: - DashBoardModel
@@ -17,7 +12,6 @@ struct DashBoardModel: Codable {
         case status = "Status"
     }
 }
-
 // MARK: - Row
 struct Row: Codable {
     let orderID: Int
@@ -38,9 +32,8 @@ struct Row: Codable {
     let customerName: String?
     let netAmount: Double?
     let createDateTime, covers: String
-    let gstPer: Double?
-    let bankDiscountID: Int?
-    let creditCardNo, creditCardAccountTile: JSONNull?
+    let gstPer, bankDiscountID: Int?
+    let creditCardNo, creditCardAccountTile: String?
     let empDiscountType: Int?
     let orderDetail, tableDetail: String?
 
@@ -78,32 +71,5 @@ struct Row: Codable {
         case empDiscountType = "EmpDiscountType"
         case orderDetail = "OrderDetail"
         case tableDetail = "TableDetail"
-    }
-}
-
-// MARK: - Encode/decode helpers
-
-class JSONNull: Codable, Hashable {
-
-    public static func == (lhs: JSONNull, rhs: JSONNull) -> Bool {
-        return true
-    }
-
-    public var hashValue: Int {
-        return 0
-    }
-
-    public init() {}
-
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if !container.decodeNil() {
-            throw DecodingError.typeMismatch(JSONNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for JSONNull"))
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encodeNil()
     }
 }

@@ -51,6 +51,8 @@ class SelectionVC: UIViewController {
             APIManager.makePOSTRequest { dashboardModelArray in
                 
 //                self.apiResponse = dashboardModelArray.flatMap { $0 }
+                var customerData = dashboardModelArray[0]
+                
                 var rowItemData = dashboardModelArray[1]
                
                 self.apiResponse = dashboardModelArray.flatMap { $0 }
@@ -94,8 +96,8 @@ class SelectionVC: UIViewController {
             }
         }
     @IBAction func minusButton(_ sender: UIButton) {
-        if let currentItemCount = Int(itemCountTxt.text ?? "0") {
-            itemCount = max(0, currentItemCount - 1)
+        if let currentItemCount = Int(itemCountTxt.text ?? "1") {
+            itemCount = max(1, currentItemCount - 1)
             updateItemCountLabel() // Update the item count label
             sendItemCountToDineInVC()
         }

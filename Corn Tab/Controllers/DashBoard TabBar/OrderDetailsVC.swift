@@ -17,6 +17,7 @@ class OrderDetailsVC: UIViewController {
     @IBOutlet weak var tableNoLbl: UILabel!
     @IBOutlet weak var orderProductLbl: UILabel!
     @IBOutlet weak var tableCoverNoLbl: UILabel!
+    @IBOutlet weak var orderNoLbl: UILabel!
     // MARK: - Var
     var addedItems: [[String: String]] = []
     var itemCounts: [Int] = []
@@ -52,6 +53,33 @@ class OrderDetailsVC: UIViewController {
         }
         if let coverTable = coverTableText {
             tableCoverNoLbl.text = coverTable
+        }
+        if let tableContent = UserDefaults.standard.dictionary(forKey: "TableContent"){
+            if let tableName = tableContent["TableName"] as? String {
+                    tableNoLbl.text = "  \(tableName)"
+                }
+            if let tableCover = tableContent["TableCover"] as? String {
+                tableCoverNoLbl.text = tableCover
+                }
+            if let orderNo = tableContent["OrderNo"] as? String{
+                orderNoLbl.text = orderNo
+            }
+            if let date = tableContent["Date"] as? String{
+                dateLbl.text = date
+            }
+            
+            if  let time = tableContent["Time"] as? String{
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "HH:mm:ss.SSS"
+                if let newTime = dateFormatter.date(from: time){
+                    dateFormatter.dateFormat = "h:mm a"
+                    if let formatedTime = dateFormatter.string(for: newTime) {
+                                timeLbl.text = formatedTime
+                            } else {
+                                print("Failed to format time.")
+                            }
+                }
+            }
         }
     }
     // MARK: - Button Action
@@ -252,21 +280,27 @@ extension OrderDetailsVC {
             orderDict["CoverTable"] = coverTableText
             var itemsArray = [[String: Any]]()
             var itemDict = [String: Any]()
-            itemDict["ID"] = 9
-            itemDict["Name"] = titleText
-            itemDict["Price"] = titlePrice
-            itemDict["Qty"] = quantityCount
-            itemDict["Discount"] = 0
-            itemDict["IsUnGroup"] = false
-            itemDict["SectionName"] = "Kitchen"
-            itemDict["ItemWiseGST"] = 0
-            itemDict["ModifierParentRowID"] = 1
-            itemDict["IsVoid"] = 0
-            itemDict["OrderNotes"] = ""
-            itemsArray.append(itemDict)
+            let addedItems = UserDefaults.standard.dictionary(forKey: "addedItems")
+            for item in addedItems ?? [:]{
+                if item.key == "ID"{
+                    itemDict["ID"] = item.value
+                }
+                itemDict["Name"] = titleText
+                itemDict["Price"] = titlePrice
+                itemDict["Qty"] = quantityCount
+                itemDict["Discount"] = 0
+                itemDict["IsUnGroup"] = false
+                itemDict["SectionName"] = "Kitchen"
+                itemDict["ItemWiseGST"] = 0
+                itemDict["ModifierParentRowID"] = 1
+                itemDict["IsVoid"] = 0
+                itemDict["OrderNotes"] = ""
+                itemsArray.append(itemDict)
+            }
+            
             orderDict["Items"] = itemsArray
             ordersArray.append(orderDict)
-            jsonStringDict["Orders"] = ordersArray
+            jsonStringDict["Orders"] = addedItems
             parametersDict["JsonString"] = jsonStringDict
             parameters["Parameters"] = parametersDict
             parameters["SpName"] = "uspInsertDataOfflineMode"
