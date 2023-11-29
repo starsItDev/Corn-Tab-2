@@ -21,16 +21,18 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var dateLbl: UILabel!
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var pendingOrder: UILabel!
+    @IBOutlet weak var scrollView: UIScrollView!
+    
     //MARK: Variables
-    //For refresh page
-    var refreshControl=UIRefreshControl()
     var orderDetail = [String]()
+    var tableDetail = [String]()
     var customerIDsString = ""
     var distributionName = ""
     var userName = ""
     var workingDate = ""
     var dataSource: [Row] = []
     var timer: Timer?
+    var refreshControl = UIRefreshControl()
     //MARK: Override Func
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,15 +42,17 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
-        refreshControl.addTarget(self, action: #selector(TabBarVC.refreshPendingRequests), for: .valueChanged)
-collectionView.addSubview(refreshControl)
-        makePOSTRequest()
-        
+        refreshControl.addTarget(self, action: #selector(TabBarVC.refreshDashboard), for: .valueChanged)
+        collectionView.addSubview(refreshControl)
+        print("cxzczxc`")
     }
     override func viewWillAppear(_ animated: Bool) {
-//        makePOSTRequest()
+        makePOSTRequest()
     }
     //MARK: Button Actions
+    @objc func refreshDashboard(){
+        makePOSTRequest()
+    }
     @IBAction func tableViewBtn(_ sender: UIButton) {
         tableView.isHidden = false
         collectionView.isHidden = true
@@ -61,113 +65,130 @@ collectionView.addSubview(refreshControl)
         tableViewBtn.tintColor = #colorLiteral(red: 0.4576840401, green: 0.4979689717, blue: 0.5107063055, alpha: 1)
         collectionViewBtn.tintColor = #colorLiteral(red: 0.9657021165, green: 0.4859523773, blue: 0.2453393936, alpha: 1)
     }
-    @objc func refreshPendingRequests(_ sender: Any){
-        makePOSTRequest()
-    }
     func startTimer() {
         timer?.invalidate()
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateDateAndTime), userInfo: nil, repeats: true)
     }
     @objc func updateDateAndTime() {
         let currentDate = Date()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "h:mm:ss a"
-        let dateString = dateFormatter.string(from: currentDate)
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm:ss a"
+        let dateString = timeFormatter.string(from: currentDate)
         timeLbl.text = dateString
+        
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        dateLbl.text = dateFormatter.string(from: currentDate)
     }
-//    @objc func eidtBtnTapped(sender: UIButton) {
-//        let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
-//        tabBarController?.delegate = self
-//        let navigationController = UINavigationController(rootViewController: tabBarController!)
-//        navigationController.modalPresentationStyle = .fullScreen
-//        if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
-//            tabBarController?.selectedIndex = 2
-//        }
-//        self.present(navigationController, animated: false, completion: nil)
-//    }
     @objc func eidtBtnTapped(_ sender: UIButton) {
-            let jsonData = self.orderDetail[sender.tag].data(using: .utf8)
-            do {
-                    // Use JSONDecoder to decode the data into an array of OrderItem
-                let orderItems = try JSONDecoder().decode([OrderItem].self, from: jsonData!)
-                    // Now 'orderItems' contains an array of decoded OrderItem objects
-                var savedItems = [[String: String]]()
-                var allOrders = [OrderItem]()
-                var selectedAddOns: [String] = []
-                var selectedAddOnPrices: [Double] = []
-                allOrders = orderItems
-                for i in 0...allOrders.count - 1{
-                    for j in 0...orderItems.count - 1{
-                        if allOrders[i].id == orderItems[j].modifierParentID{
-                            let addOnInfo = "\(orderItems[j].name) (\(orderItems[j].price ?? 0))"
-                            selectedAddOns.append(addOnInfo)
-                            selectedAddOnPrices.append(orderItems[i].price ?? 0)
-                        }
+        let jsonData = self.orderDetail[sender.tag].data(using: .utf8)
+        do {
+            // Use JSONDecoder to decode the data into an array of OrderItem
+            let orderItems = try JSONDecoder().decode([OrderItem].self, from: jsonData!)
+            
+            // Now 'orderItems' contains an array of decoded OrderItem objects
+            var savedItems = [[String: String]]()
+            var allOrders = [OrderItem]()
+            var selectedAddOns: [String] = []
+            var selectedAddOnPrices: [Double] = []
+            var modifierParentIds = [Int: [String]]()
+            var totalAddOnPrices = [Int: [Double]]()
+            allOrders = orderItems
+            for i in 0...allOrders.count - 1{
+                for j in 0...orderItems.count - 1{
+                    if allOrders[i].id == orderItems[j].modifierParentID{
+                        
+                        let addOnInfo = "\(orderItems[j].name) (\(orderItems[j].price ?? 0))"
+                        selectedAddOns.append(addOnInfo)
+                        selectedAddOnPrices.append(orderItems[j].price ?? 0)
+                        modifierParentIds[orderItems[j].modifierParentID] = selectedAddOns
+                        totalAddOnPrices[orderItems[j].modifierParentID] = selectedAddOnPrices
                     }
                 }
-                let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
-                
-                let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
-                    for orderItem in orderItems {
-                        //print("OrderID: \(orderItem.orderID), Name: \(orderItem.name), Price: \(orderItem.price)")
-                        let totalPrice = Int((orderItem.price ?? 0) + totalAddOnPrice)
-                        if orderItem.isHasAddsOn{
-                            let newItem: [String: String] = [
-                                "title": orderItem.name,
-                                "quantity": "\(Int(orderItem.qty ?? 0))",
-                                "price" : "\(totalPrice)",
-                                "selectedAddOns": "\(selectedAddOnsString)",
-                            ]
-                            
-                            savedItems.append(newItem)
-                        }
-                        else if orderItem.isAddsOn{
-                            
-                        }
-                        else{
-                            let newItem: [String: String] = [
-                                "title": orderItem.name,
-                                "quantity": "\(Int(orderItem.qty ?? 0))",
-                                "price" : "\(orderItem.price ?? 00)",
-                                "selectedAddOns": "",
-                            ]
-                            
-                            savedItems.append(newItem)
-                        }
+                selectedAddOns.removeAll()
+                selectedAddOnPrices.removeAll()
+            }
+            let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
+            
+            //let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
+            for orderItem in orderItems {
+                //print("OrderID: \(orderItem.orderID), Name: \(orderItem.name), Price: \(orderItem.price)")
+                var totalPrice = Int((orderItem.price ?? 0) + totalAddOnPrice)
+                if orderItem.isHasAddsOn{
+                    var str = String()
+                    if let addOnIds = modifierParentIds[orderItem.id] {
+                        str = addOnIds.joined(separator: "\n")
                     }
-                
-                UserDefaults.standard.set(savedItems, forKey: "addedItems")
-                } catch {
-                    print("Error decoding JSON: \(error)")
+                    
+                    if let addOnPrices = totalAddOnPrices[orderItem.id] {
+                        totalPrice += Int(addOnPrices.reduce(0.0, +))
+                    }
+                    let newItem: [String: String] = [
+                        "title": orderItem.name,
+                        "quantity": "\(Int(orderItem.qty ?? 0))",
+                        "price" : "\(totalPrice)",
+                        "selectedAddOns": "\(str)",
+                    ]
+                    
+                    savedItems.append(newItem)
                 }
-            
-//            let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
-//            tabBarController?.delegate = self
-//            let navigationController = UINavigationController(rootViewController: tabBarController!)
-//            navigationController.modalPresentationStyle = .fullScreen
-//            if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
-//                tabBarController?.selectedIndex = 2
-//            }
-//            self.present(navigationController, animated: false, completion: nil)
-//        }
-        // Pass information to the next view controller
-            let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
-
-            // Assuming the next view controller is at index 2 (change it according to your actual setup)
-            if let nextViewController = tabBarController?.viewControllers?[2] as? OrderDetailsVC {
-                nextViewController.updatedButtonText = "Updated Order"
+                else if orderItem.isAddsOn{
+                    
+                }
+                else{
+                    let newItem: [String: String] = [
+                        "title": orderItem.name,
+                        "quantity": "\(Int(orderItem.qty ?? 0))",
+                        "price" : "\(orderItem.price ?? 0)",
+                        "selectedAddOns": "",
+                    ]
+                    
+                    savedItems.append(newItem)
+                }
+                
             }
-
-            tabBarController?.delegate = self
-            let navigationController = UINavigationController(rootViewController: tabBarController!)
-            navigationController.modalPresentationStyle = .fullScreen
-            if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
-                tabBarController?.selectedIndex = 2
+            let coverTable = dataSource[sender.tag].coverTable
+            let orderNo = dataSource[sender.tag].orderNO
+            let dateTime = dataSource[sender.tag].createDateTime.split(separator: "T")
+            let jsonForTable = self.tableDetail[sender.tag].data(using: .utf8)
+            do{
+                let tableItems = try JSONDecoder().decode([TableItem].self, from: jsonForTable!)
+                if let firstTableDetail = tableItems.first {
+                    let orderID = firstTableDetail.OrderID
+                    let tableID = firstTableDetail.TableID
+                    let tableName = firstTableDetail.TableName
+                    
+                    let newItem: [String: String] = [
+                        "OrderNo": orderNo,
+                        "TableCover": coverTable,
+                        "TableName" : tableName ?? "",
+                        "Date": String(dateTime[0]),
+                        "Time": String(dateTime[1])
+                    ]
+                    UserDefaults.standard.set(newItem, forKey: "TableContent")
+                }
+            } catch{
+                print("Error decoding JSON: \(error)")
             }
-            
-            // Present the navigation controller
-            self.present(navigationController, animated: false, completion: nil)
+            UserDefaults.standard.set(savedItems, forKey: "addedItems")
+        } catch {
+            print("Error decoding JSON: \(error)")
         }
+        
+        
+        
+        let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
+        tabBarController?.delegate = self
+        let navigationController = UINavigationController(rootViewController: tabBarController!)
+        navigationController.modalPresentationStyle = .fullScreen
+        if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
+            tabBarController?.selectedIndex = 2
+            //tabBarController.tableNumberText = tableNoLbl.text
+            //tabBarController.coverTableText = coverTableLbl.text
+        }
+        self.present(navigationController, animated: false, completion: nil)
+    }
 }
 //MARK: Helper function to make POST request
 extension TabBarVC {
@@ -216,7 +237,7 @@ extension TabBarVC {
                         print(date?[1] ?? "")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
-                        self.refreshControl.endRefreshing()
+                        
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
                     }
@@ -244,20 +265,49 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
             // Extract table names and join them with a "+"
             let tableNames = jsonArray.compactMap { $0["TableName"] as? String }
             let concatenatedNames = tableNames.joined(separator: "+")
-
+            
             cell.tableNoLbl.text = concatenatedNames
         } else {
             cell.tableNoLbl.text = "" // Handle invalid JSON data or missing TableName
         }
-
+        
         cell.orderNoLbl.text = rowData.orderNO
-        cell.timeLbl.text = rowData.createDateTime
-//        cell.tableNoLbl.text = rowData.tableDetail
+        var date = rowData.createDateTime.components(separatedBy: "T")
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm:ss.SSS"
+        if let newTime = timeFormatter.date(from: date[1]){
+            timeFormatter.dateFormat = "h:mm a"
+            if let formatedTime = timeFormatter.string(for: newTime) {
+                date[1] = formatedTime
+                    } else {
+                        print("Failed to format time.")
+                    }
+        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        if let newDate = dateFormatter.date(from: date[0]){
+            dateFormatter.dateFormat = "dd-MM-yyyy"
+            if let formatedDate = dateFormatter.string(for: newDate) {
+                date[0] = formatedDate
+                    } else {
+                        print("Failed to format time.")
+                    }
+        }
+        cell.timeLbl.text = date[0] + " " + date[1]
+        //        cell.tableNoLbl.text = rowData.tableDetail
         self.orderDetail.append(rowData.orderDetail ?? "")
-                cell.eidtBtn.tag = indexPath.item
+        self.tableDetail.append(rowData.tableDetail ?? "")
+        cell.eidtBtn.tag = indexPath.item
         cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(_:)), for: .touchUpInside)
         return cell
     }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+            return CGSize(width: 270, height: 200)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
 }
 //MARK: TableView
 extension TabBarVC: UITableViewDelegate, UITableViewDataSource {
@@ -276,14 +326,16 @@ extension TabBarVC: UITableViewDelegate, UITableViewDataSource {
             // Extract table names and join them with a "+"
             let tableNames = jsonArray.compactMap { $0["TableName"] as? String }
             let concatenatedNames = tableNames.joined(separator: "+")
-
+            
             cell.tableNoLbl.text = concatenatedNames
         } else {
             cell.tableNoLbl.text = "" // Handle invalid JSON data or missing TableName
         }
         cell.orderNoLbl.text = rowData.orderNO
-        cell.timeLbl.text = rowData.createDateTime
-//        cell.tableNoLbl.text = rowData.tableDetail
+        let date = rowData.createDateTime.components(separatedBy: "T")
+        cell.timeLbl.text = date[0] + " " + date[1]
+        //cell.timeLbl.text = rowData.createDateTime
+        //        cell.tableNoLbl.text = rowData.tableDetail
         let spacing: CGFloat = 20
         cell.separatorInset = UIEdgeInsets(top: 0, left: spacing, bottom: 100, right: spacing)
         

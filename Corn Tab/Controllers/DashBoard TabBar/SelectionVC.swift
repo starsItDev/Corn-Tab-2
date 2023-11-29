@@ -5,12 +5,15 @@
 //  Created by StarsDev on 12/07/2023.
 
 import UIKit
-class SelectionVC: UIViewController {
+class SelectionVC: UIViewController{
     // MARK: Outlets
     @IBOutlet weak var segments: UISegmentedControl!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var itemCountTxt: UITextField!
     @IBOutlet weak var searchBar: UISearchBar!
+    
+    @IBOutlet weak var tableView: UITableView!
+    
     //MARK: Var
     var itemCount = 0
     var receivedItemCount: Int = 0
@@ -22,6 +25,7 @@ class SelectionVC: UIViewController {
     var sectionNameToID: [String: Int] = [:]
     var selectedTableNumbers: [String] = []
     var selectedIndexPaths: Set<IndexPath> = []
+    let data = ["Item 1", "Item 2", "Item 3", "Item 4"]
     // MARK: View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +34,8 @@ class SelectionVC: UIViewController {
         apiCalling()
         itemCountTxt.keyboardType = .numberPad
         UserDefaults.standard.removeObject(forKey: "SelectedTableIDs")
+        tableView.isHidden = true
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
     private func setupUI() {
             navigationController?.setNavigationBarHidden(true, animated: false)
@@ -41,6 +47,7 @@ class SelectionVC: UIViewController {
             searchBar.delegate = self
         }
 // MARK: Actions
+    
         func apiCalling(){
             let loader = UIActivityIndicatorView(style: .large)
                 loader.center = view.center
@@ -56,24 +63,7 @@ class SelectionVC: UIViewController {
                     return
                 }
                 let rowItemData = dashboardModelArray[1]
-                
-                
-//                self.apiResponse = dashboardModelArray.flatMap { $0 }
-//                var rowItemData = dashboardModelArray[1]
-//
-//                self.apiResponse = dashboardModelArray.flatMap { $0 }
-//
-//                       // Retrieve rowItemData
-//                       if dashboardModelArray.count > 1 {
-//                           rowItemData = dashboardModelArray[1]
-//
-//                           // Encode and save rowItemData to UserDefaults
-//                           if let encodedData = try? JSONEncoder().encode(rowItemData) {
-//                               UserDefaults.standard.set(encodedData, forKey: "rowItemData")
-//                           }
-//                       }
-
-                
+                            
                 for dashboardModel in dashboardModelArray {
                     for row in dashboardModel {
                             if let sectionID = row.floorID, let sectionName = row.floorName {
@@ -104,20 +94,7 @@ class SelectionVC: UIViewController {
                         }
                     }
                 }
-//                DispatchQueue.main.async {
-//                    loader.stopAnimating()
-//                            loader.removeFromSuperview()
-//                    self.apiResponse = rowItemData
-//                    self.segments.removeAllSegments()
-//                    self.sectionNameToID = sectionNameToID// Clear existing segments
-//                    for (index, sectionName) in self.sectionNames.enumerated() {
-//                        self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
-//                    }
-//                    self.segments.selectedSegmentIndex = 0
-//                    self.collectionView.reloadData()
-//                }
-//            }
-//        }
+
     @IBAction func minusButton(_ sender: UIButton) {
         if let currentItemCount = Int(itemCountTxt.text ?? "0") {
             itemCount = max(0, currentItemCount - 1)
@@ -145,6 +122,34 @@ class SelectionVC: UIViewController {
            let dineInVC = tabBarController.viewControllers?[3] as? DineInVC {
             dineInVC.receivedItemCount = String(itemCount)
         }
+    }
+}
+extension SelectionVC:UITableViewDataSource, UITableViewDelegate  {
+    // MARK: - UITableViewDataSource
+
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return data.count
+        }
+
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            cell.textLabel?.text = data[indexPath.row]
+            return cell
+        }
+
+        // MARK: - UITableViewDelegate
+
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            // Handle row selection, if needed
+            print("Selected row: \(indexPath.row)")
+        }
+}
+//MARK: Extension SearchBar
+extension SelectionVC: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    
     }
 }
 //MARK: Collection View
@@ -242,59 +247,6 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
             let nextTabIndex = 3
             tabBarController.selectedIndex = nextTabIndex
         }
-    }
-
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        if let cell = collectionView.cellForItem(at: indexPath) as? SelectionCVCell {
-//            if let selectedText = cell.tableNumberLbl.text {
-//                let selectedSegmentTitle = segments.titleForSegment(at: segments.selectedSegmentIndex)
-//                let vc = self.tabBarController?.viewControllers?[3] as? DineInVC
-//                vc?.receivedLabelText = selectedText
-//                if selectedIndexPaths.contains(indexPath) {
-//                    if let indexToRemove = selectedTableNumbers.firstIndex(of: selectedText) {
-//                        selectedTableNumbers.remove(at: indexToRemove)
-//                    }
-//                } else {
-//                    selectedTableNumbers.append(selectedText)
-//                }
-//                vc?.receivedSegmentTitle = selectedSegmentTitle
-//                vc?.receivedLabelText = selectedTableNumbers.joined(separator: " + ")
-//                vc?.receivedItemCount = String(itemCount)
-//            }
-//        }
-//
-//        if selectedIndexPaths.contains(indexPath) {
-//            selectedIndexPaths.remove(indexPath)
-//        } else {
-//            selectedIndexPaths.insert(indexPath)
-//        }
-//        collectionView.reloadItems(at: [indexPath])
-//        if let tabBarController = self.tabBarController {
-//            let nextTabIndex = 3
-//            tabBarController.selectedIndex = nextTabIndex
-//        }
-//    }
-}
-
-//MARK: Extension SearchBar
-extension SelectionVC: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchText.isEmpty {
-            // If the search text is empty, show all data
-            collectionView.reloadData()
-        } else {
-            // Filter the data based on the search text
-            let filteredItems = apiResponse.filter { item in
-                return item.tableNo?.lowercased().contains(searchText.lowercased()) ?? false
-            }
-            apiResponse = filteredItems
-            collectionView.reloadData()
-        }
-    }
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.text = nil
-        searchBar.resignFirstResponder()
-        collectionView.reloadData()
     }
 }
 

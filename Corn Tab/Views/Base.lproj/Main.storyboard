@@ -646,6 +646,15 @@
                                     <outlet property="delegate" destination="3MC-BA-0nG" id="qwq-Su-6R5"/>
                                 </connections>
                             </collectionView>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="QOo-aA-uBR">
+                                <rect key="frame" x="30" y="235" width="684" height="848"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="3MC-BA-0nG" id="uka-Am-OfW"/>
+                                    <outlet property="delegate" destination="3MC-BA-0nG" id="9VE-IZ-h7n"/>
+                                </connections>
+                            </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="uJ0-CB-vOx"/>
                         <color key="backgroundColor" red="0.95637863869999995" green="0.97224265340000005" blue="0.99313026670000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -655,17 +664,21 @@
                             <constraint firstItem="p4g-Tl-5kI" firstAttribute="leading" secondItem="uJ0-CB-vOx" secondAttribute="leading" id="8UD-ZF-2mF"/>
                             <constraint firstItem="fSK-CI-FL3" firstAttribute="top" secondItem="p4g-Tl-5kI" secondAttribute="bottom" constant="40" id="9T5-y7-BfM"/>
                             <constraint firstItem="uJ0-CB-vOx" firstAttribute="trailing" secondItem="p4g-Tl-5kI" secondAttribute="trailing" id="DXc-TV-Ntg"/>
+                            <constraint firstItem="uJ0-CB-vOx" firstAttribute="trailing" secondItem="fSK-CI-FL3" secondAttribute="trailing" constant="25" id="Mgb-8t-Ks3"/>
                             <constraint firstItem="YAl-yv-xj5" firstAttribute="trailing" secondItem="uJ0-CB-vOx" secondAttribute="trailing" id="MtV-oh-mBS"/>
                             <constraint firstItem="50m-Pt-O7e" firstAttribute="top" secondItem="NkG-uL-xcy" secondAttribute="bottom" constant="20" id="OkE-rT-ESR"/>
                             <constraint firstItem="fSK-CI-FL3" firstAttribute="bottom" secondItem="uJ0-CB-vOx" secondAttribute="bottom" id="XRv-9O-MpJ"/>
+                            <constraint firstItem="fSK-CI-FL3" firstAttribute="leading" secondItem="uJ0-CB-vOx" secondAttribute="leading" constant="25" id="XXC-hk-Jpc"/>
                             <constraint firstItem="YAl-yv-xj5" firstAttribute="top" secondItem="dpd-GV-WB3" secondAttribute="top" id="aHt-j9-VbP"/>
                             <constraint firstItem="uJ0-CB-vOx" firstAttribute="trailing" secondItem="50m-Pt-O7e" secondAttribute="trailing" constant="30" id="brp-wQ-eWw"/>
                             <constraint firstItem="50m-Pt-O7e" firstAttribute="leading" secondItem="uJ0-CB-vOx" secondAttribute="leading" constant="30" id="eFW-EI-5gX"/>
                             <constraint firstItem="uJ0-CB-vOx" firstAttribute="trailing" secondItem="fSK-CI-FL3" secondAttribute="trailing" constant="25" id="gOC-u0-fNE"/>
                             <constraint firstItem="uJ0-CB-vOx" firstAttribute="trailing" secondItem="NkG-uL-xcy" secondAttribute="trailing" constant="30" id="j1N-8e-H2B"/>
                             <constraint firstItem="p4g-Tl-5kI" firstAttribute="top" secondItem="50m-Pt-O7e" secondAttribute="bottom" constant="30" id="l56-un-9EO"/>
+                            <constraint firstItem="fSK-CI-FL3" firstAttribute="top" secondItem="p4g-Tl-5kI" secondAttribute="bottom" constant="40" id="sUC-0F-Xhh"/>
                             <constraint firstItem="NkG-uL-xcy" firstAttribute="leading" secondItem="uJ0-CB-vOx" secondAttribute="leading" constant="30" id="tAD-KE-J5N"/>
                             <constraint firstItem="YAl-yv-xj5" firstAttribute="leading" secondItem="uJ0-CB-vOx" secondAttribute="leading" id="uTK-8U-aPM"/>
+                            <constraint firstItem="fSK-CI-FL3" firstAttribute="bottom" secondItem="uJ0-CB-vOx" secondAttribute="bottom" id="ykk-eG-fdy"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Selection" image="Icon material-select-all" id="8qO-DE-lmd"/>
@@ -675,6 +688,7 @@
                         <outlet property="itemCountTxt" destination="aSK-Nw-B6Z" id="zjH-ZT-rJ0"/>
                         <outlet property="searchBar" destination="JLp-DA-bjB" id="AKo-KH-H7F"/>
                         <outlet property="segments" destination="p4g-Tl-5kI" id="EGR-7F-nwg"/>
+                        <outlet property="tableView" destination="QOo-aA-uBR" id="XJj-TY-7Bn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="r1U-TZ-gCa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key></key>
+	<string></string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -21,9 +23,5 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Please Allow to continue with face id</string>
-	<key></key>
-	<string></string>
 </dict>
 </plist>
