@@ -272,7 +272,8 @@ class DealsVC: UIViewController {
         }
         // Move your API response processing logic here
         var sectionNameToID: [String: Int] = [:]
-        let rowItemData = self.parsedRows[6] // Assuming you want to use data from parsedRows
+        
+        let rowItemData = self.parsedRows[6]
         let addOnsItemData = self.parsedRows[7]
         
         for dashboardModel in self.parsedRows {

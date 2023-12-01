@@ -101,14 +101,14 @@ class SelectionVC: UIViewController{
                     }
                 }
     @IBAction func minusButton(_ sender: UIButton) {
-        if let currentItemCount = Int(itemCountTxt.text ?? "0") {
-            itemCount = max(0, currentItemCount - 1)
+        if let currentItemCount = Int(itemCountTxt.text ?? "1") {
+            itemCount = max(1, currentItemCount - 1)
             updateItemCountLabel() // Update the item count label
             sendItemCountToDineInVC()
         }
     }
     @IBAction func plusButton(_ sender: UIButton) {
-        if let currentItemCount = Int(itemCountTxt.text ?? "0") {
+        if let currentItemCount = Int(itemCountTxt.text ?? "1") {
             itemCount = currentItemCount + 1
             updateItemCountLabel() // Update the item count label
             sendItemCountToDineInVC()
@@ -349,84 +349,3 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
         }
     }
 }
-
-//    func apiCalling(){
-//        var sectionNameToID: [String: Int] = [:]
-//        APIManager.makePOSTRequest { dashboardModelArray in
-//            self.apiResponse = dashboardModelArray.flatMap { $0 }
-//            let rowItemData = dashboardModelArray[1]
-//            for dashboardModel in dashboardModelArray {
-//                for row in dashboardModel {
-//                        if let sectionID = row.floorID, let sectionName = row.floorName {
-//                            if !sectionNameToID.keys.contains(sectionName) {
-//                                sectionNameToID[sectionName] = sectionID
-//                                print(sectionID)
-//                                self.sectionNames.append(sectionName)
-//                            }
-//                        if let itemID = row.floorID {
-//                            self.itemIDToSectionID[itemID] = sectionID
-//                        }
-//                    }
-//                }
-//            }
-//            DispatchQueue.main.async {
-//                self.apiResponse = rowItemData
-//                self.segments.removeAllSegments()
-//                self.sectionNameToID = sectionNameToID// Clear existing segments
-//                for (index, sectionName) in self.sectionNames.enumerated() {
-//                    self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
-//                }
-//                self.segments.selectedSegmentIndex = 0
-//                self.collectionView.reloadData()
-//            }
-//        }
-//    }
-//func userDefaults() {
-//    // Attempt to retrieve data from UserDefaults
-//    if let savedData = UserDefaults.standard.data(forKey: "parsedDataKey") {
-//        do {
-//            // Decode the data into parsedRows
-//            let decoder = JSONDecoder()
-//            let parsedRows = try decoder.decode([[MasterDetailRow]].self, from: savedData)
-//
-//            // Process the parsed data
-//            var sectionNameToID: [String: Int] = [:]
-//            let rowItemData = parsedRows[1] // Assuming you want to use data from parsedRows
-//            for dashboardModel in parsedRows {
-//                for row in dashboardModel {
-//                    if let sectionID = row.floorID, let sectionName = row.floorName {
-//                        if !sectionNameToID.keys.contains(sectionName) {
-//                            sectionNameToID[sectionName] = sectionID
-//                            self.sectionNames.append(sectionName)
-//                        }
-//                        if let itemID = row.floorID {
-//                            self.itemIDToSectionID[itemID] = sectionID
-//                        }
-//                    }
-//                }
-//            }
-//            // UI updates on the main thread
-//            DispatchQueue.main.async {
-//                self.apiResponse = rowItemData
-//                self.segments.removeAllSegments()
-//                self.sectionNameToID = sectionNameToID // Clear existing segments
-//                for (index, sectionName) in self.sectionNames.enumerated() {
-//                    self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
-//                }
-//                self.segments.selectedSegmentIndex = 0
-//                self.collectionView.reloadData()
-//            }
-//        } catch {
-//            // Handle decoding errors
-//            print("Error decoding saved data: \(error)")
-//        }
-//    } else {
-//        // Handle the case where no data is saved in UserDefaults
-//    }
-//}
-
-
-
-
-
-

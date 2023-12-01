@@ -22,8 +22,8 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var pendingOrder: UILabel!
     @IBOutlet weak var scrollView: UIScrollView!
-    
     //MARK: Variables
+    var activityIndicator: UIActivityIndicatorView!
     var orderDetail = [String]()
     var tableDetail = [String]()
     var customerIDsString = ""
@@ -32,7 +32,6 @@ class TabBarVC: UIViewController {
     var workingDate = ""
     var dataSource: [Row] = []
     var timer: Timer?
-    var refreshControl = UIRefreshControl()
     //MARK: Override Func
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,17 +41,30 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
-        refreshControl.addTarget(self, action: #selector(TabBarVC.refreshDashboard), for: .valueChanged)
-        collectionView.addSubview(refreshControl)
-        print("cxzczxc`")
     }
     override func viewWillAppear(_ animated: Bool) {
+        showLoader()
+
         makePOSTRequest()
     }
+    func showLoader() {
+            activityIndicator = UIActivityIndicatorView(style: .large)
+            activityIndicator.center = view.center
+            // Add the activity indicator to the view
+            view.addSubview(activityIndicator)
+            activityIndicator.startAnimating()
+        }
+
+        func hideLoader() {
+            // Stop animating and remove the activity indicator
+            activityIndicator.stopAnimating()
+            activityIndicator.removeFromSuperview()
+        }
     //MARK: Button Actions
-    @objc func refreshDashboard(){
+    @IBAction func refreshBtn(_ sender: UIButton) {
         makePOSTRequest()
     }
+
     @IBAction func tableViewBtn(_ sender: UIButton) {
         tableView.isHidden = false
         collectionView.isHidden = true
@@ -75,8 +87,6 @@ class TabBarVC: UIViewController {
         timeFormatter.dateFormat = "h:mm:ss a"
         let dateString = timeFormatter.string(from: currentDate)
         timeLbl.text = dateString
-        
-        
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
         dateLbl.text = dateFormatter.string(from: currentDate)
@@ -86,7 +96,6 @@ class TabBarVC: UIViewController {
         do {
             // Use JSONDecoder to decode the data into an array of OrderItem
             let orderItems = try JSONDecoder().decode([OrderItem].self, from: jsonData!)
-            
             // Now 'orderItems' contains an array of decoded OrderItem objects
             var savedItems = [[String: String]]()
             var allOrders = [OrderItem]()
@@ -98,7 +107,6 @@ class TabBarVC: UIViewController {
             for i in 0...allOrders.count - 1{
                 for j in 0...orderItems.count - 1{
                     if allOrders[i].id == orderItems[j].modifierParentID{
-                        
                         let addOnInfo = "\(orderItems[j].name) (\(orderItems[j].price ?? 0))"
                         selectedAddOns.append(addOnInfo)
                         selectedAddOnPrices.append(orderItems[j].price ?? 0)
@@ -110,17 +118,13 @@ class TabBarVC: UIViewController {
                 selectedAddOnPrices.removeAll()
             }
             let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
-            
-            //let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
             for orderItem in orderItems {
-                //print("OrderID: \(orderItem.orderID), Name: \(orderItem.name), Price: \(orderItem.price)")
                 var totalPrice = Int((orderItem.price ?? 0) + totalAddOnPrice)
                 if orderItem.isHasAddsOn{
                     var str = String()
                     if let addOnIds = modifierParentIds[orderItem.id] {
                         str = addOnIds.joined(separator: "\n")
                     }
-                    
                     if let addOnPrices = totalAddOnPrices[orderItem.id] {
                         totalPrice += Int(addOnPrices.reduce(0.0, +))
                     }
@@ -143,10 +147,8 @@ class TabBarVC: UIViewController {
                         "price" : "\(orderItem.price ?? 0)",
                         "selectedAddOns": "",
                     ]
-                    
                     savedItems.append(newItem)
                 }
-                
             }
             let coverTable = dataSource[sender.tag].coverTable
             let orderNo = dataSource[sender.tag].orderNO
@@ -158,7 +160,6 @@ class TabBarVC: UIViewController {
                     let orderID = firstTableDetail.OrderID
                     let tableID = firstTableDetail.TableID
                     let tableName = firstTableDetail.TableName
-                    
                     let newItem: [String: String] = [
                         "OrderNo": orderNo,
                         "TableCover": coverTable,
@@ -175,9 +176,6 @@ class TabBarVC: UIViewController {
         } catch {
             print("Error decoding JSON: \(error)")
         }
-        
-        
-        
         let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
         tabBarController?.delegate = self
         let navigationController = UINavigationController(rootViewController: tabBarController!)
@@ -206,7 +204,6 @@ extension TabBarVC {
             "Parameters": [
                 "DistributorID": "1"]
         ]
-        // Convert parameters to JSON data
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: parameters, options: [])
             // Create a URL request
@@ -229,17 +226,16 @@ extension TabBarVC {
                     let decoder = JSONDecoder()
                     let dashboardModel = try decoder.decode(DashBoardModel.self, from: data).rows
                     let pendingOrder = try decoder.decode(DashBoardModel.self, from: data).totalLength
-                    print(dashboardModel) // Check if the decoding is successful and the model is correctly populated
                     self.dataSource = dashboardModel
-                    // Reload the collection view on the main thread
                     DispatchQueue.main.async {
+                       
                         let date = dashboardModel.first?.createDateTime.components(separatedBy: "T")
                         print(date?[1] ?? "")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
-                        
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
+                        self.hideLoader()
                     }
                 } catch let error {
                     print("Error decoding API response: \(error)")
@@ -261,16 +257,12 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
         let rowData = dataSource[indexPath.item]
         if let tableDetailData = rowData.tableDetail?.data(using: .utf8),
            let jsonArray = try? JSONSerialization.jsonObject(with: tableDetailData, options: []) as? [[String: Any]] {
-            
-            // Extract table names and join them with a "+"
             let tableNames = jsonArray.compactMap { $0["TableName"] as? String }
             let concatenatedNames = tableNames.joined(separator: "+")
-            
             cell.tableNoLbl.text = concatenatedNames
         } else {
-            cell.tableNoLbl.text = "" // Handle invalid JSON data or missing TableName
+            cell.tableNoLbl.text = ""
         }
-        
         cell.orderNoLbl.text = rowData.orderNO
         var date = rowData.createDateTime.components(separatedBy: "T")
         let timeFormatter = DateFormatter()
