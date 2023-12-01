@@ -23,6 +23,7 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var pendingOrder: UILabel!
     @IBOutlet weak var scrollView: UIScrollView!
     //MARK: Variables
+    var tableIDs: [String] = []
     var activityIndicator: UIActivityIndicatorView!
     var orderDetail = [String]()
     var tableDetail = [String]()
@@ -228,11 +229,14 @@ extension TabBarVC {
                     let pendingOrder = try decoder.decode(DashBoardModel.self, from: data).totalLength
                     self.dataSource = dashboardModel
                     DispatchQueue.main.async {
-                       
                         let date = dashboardModel.first?.createDateTime.components(separatedBy: "T")
                         print(date?[1] ?? "")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
+                        self.tableIDs = dashboardModel.compactMap { $0.tableID }
+                        
+                        // Print or use the array as needed
+                        print("TableIDs: \(self.tableIDs)")
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
                         self.hideLoader()
@@ -301,7 +305,7 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
     }
     
 }
-//MARK: TableView
+//MARK: Table  View
 extension TabBarVC: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return dataSource.count
@@ -353,9 +357,14 @@ extension TabBarVC:UITabBarControllerDelegate ,UITabBarDelegate {
             tabBarController?.delegate = self
             let navigationController = UINavigationController(rootViewController: tabBarController!)
             navigationController.modalPresentationStyle = .fullScreen
+            if let selectionVC = tabBarController?.viewControllers?[1] as? SelectionVC {
+                       selectionVC.receivedTableIDs = tableIDs
+                   }
             if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 1 {
                 tabBarController?.selectedIndex = 1
+                
             }
+
             self.present(navigationController, animated: false, completion: nil)
         }
         else if item == takeaWayTabbar {
@@ -373,6 +382,7 @@ extension TabBarVC:UITabBarControllerDelegate ,UITabBarDelegate {
             self.present(navigationController, animated: false, completion: nil)
         }
     }
+ 
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if tabBarController.selectedIndex == 0 {
             tabBarController.dismiss(animated: false,completion: {
