@@ -250,6 +250,9 @@ class OrderDetailsVC: UIViewController {
           } else if let itemPrice = item["itemPrice"], !itemPrice.isEmpty {
               cell.priceLbl.text = "PKR: " + itemPrice
               titlePrice = itemPrice
+          } else if let basePrice = item["BasePrice"], !basePrice.isEmpty {
+              cell.priceLbl.text = "PKR: " + basePrice
+              titlePrice = basePrice
           }
           if let item = item["Qty"], !item.isEmpty {
               cell.quantityLbl.text =  item
