@@ -14,5 +14,5 @@ class DineInCVCell: UICollectionViewCell {
     @IBOutlet weak var imagePath: UIImageView!
     @IBOutlet weak var qtyLbl: UILabel!
     
-    
+    var itemId: Int?
 }

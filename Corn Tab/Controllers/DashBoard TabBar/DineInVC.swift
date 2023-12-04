@@ -40,6 +40,7 @@ class DineInVC: UIViewController{
     var receivedSegmentTitle: String?
     var receivedItemCount: String? = nil
     
+    var selectedItemID: Int?
     var selectedItemName: String?
     var selectedItemPrice: String?
     var itemCountinCV = 1
@@ -48,6 +49,7 @@ class DineInVC: UIViewController{
     var apiResponse: [MasterDetailRow] = []
     var apiResponseAddOns: [MasterDetailRow] = []
     var parsedRows: [[MasterDetailRow]] = []
+    
     // MARK: View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -163,7 +165,7 @@ class DineInVC: UIViewController{
         categoriesButton.backgroundColor = #colorLiteral(red: 0.8596192002, green: 0.3426481783, blue: 0.2044148147, alpha: 1)
         dealsButton.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         categoriesButton.setTitleColor(.white, for: .normal)
-            dealsButton.setTitleColor(.black, for: .normal) 
+            dealsButton.setTitleColor(.black, for: .normal)
     }
     
     @IBAction func dealsBtn(_ sender: UIButton) {
@@ -194,6 +196,7 @@ class DineInVC: UIViewController{
         }
     }
     @IBAction func addToOrder(_ sender: UIButton) {
+        
         guard itemCount > 0 else {
             showAlert(title: "Error", message: "Please select items to add to the order.")
             return
@@ -205,20 +208,40 @@ class DineInVC: UIViewController{
         let basePrice = Double(basePriceText) ?? 0.0
         var selectedAddOns: [String] = []
         var selectedAddOnPrices: [Double] = []
+        var selectedAddOnIds: [String] = []
+        var selectedAddOnInfo = [[String:Any]]()
+        var itemID = String()
         
         for indexPath in selectedAddOnIndexPaths {
             if let cell = addOnscollectionView.cellForItem(at: indexPath) as? AddOnsDineCVCell,
                let addOnName = cell.nameLabel.text,
                let addOnPriceText = cell.priceLabel.text,
+               let addOnId = cell.addOnId,
+               let itemId = cell.itemId,
                let addOnPrice = Double(addOnPriceText.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
+                //itemID.append(itemId)
                 let addOnInfo = "\(addOnName) (\(addOnPrice))"
                 selectedAddOns.append(addOnInfo)
                 selectedAddOnPrices.append(addOnPrice)
+                selectedAddOnIds.append("\(addOnId)")
+                itemID = "\(itemId)"
+                //selectedAddOnIds.updateValue(addOnName, forKey: "\(addOnId)")
+//                let newAddOn: [String: Any] = [
+//                    "addOnName":  addOnName ,
+//                    "addOnPrice": addOnPriceText ,
+//                    "addOnId": addOnId,
+//                    "itemId": itemId ,
+//                ]
+//                selectedAddOnInfo.append(newAddOn)
             }
         }
+        UserDefaults.standard.set(selectedAddOnInfo, forKey: "selectedAddOnInfo")
+//        print(type(of: selectedAddOnInfo))
         let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
         let totalPrice = basePrice + totalAddOnPrice
         let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
+        let selectedAddOnIdString = selectedAddOnIds.joined(separator: "\n")
+        //let itemIdString = itemID.joined(separator: "\n")
         let titleWithPrice: String
         if selectedAddOnsString.isEmpty {
             titleWithPrice = title
@@ -226,10 +249,16 @@ class DineInVC: UIViewController{
             titleWithPrice = "\(title) - (\(basePriceText))"
         }
         let newItem: [String: String] = [
-            "title": titleWithPrice,
-            "quantity": quantity,
-            "price" : "\(totalPrice)",
-            "selectedAddOns": selectedAddOnsString,
+            //"AddOnId": selectedAddOnIdString,
+            "Title": titleWithPrice,
+            "Qty": quantity,
+            "Price" : "\(totalPrice)",
+            "BasePrice": "\(basePrice)",
+            "SelectedAddOns": selectedAddOnsString,
+            "SelectedAddOnsId":selectedAddOnIdString,
+            "ID": itemID,
+//            "SelectedAddOnPrice":
+            "isAddOn": "true"
         ]
         var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
         savedItems.append(newItem)
@@ -238,7 +267,7 @@ class DineInVC: UIViewController{
         addOnscollectionView.reloadData()
     }
     @IBAction func minusButton(_ sender: UIButton) {
-        itemCount = max(0, itemCount - 1)
+        itemCount = max(1, itemCount - 1)
         updateItemCountLabel()
     }
     @IBAction func plusButton(_ sender: UIButton) {
@@ -310,6 +339,7 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
             if indexPath.row < validItems.count {
                 let item = validItems[indexPath.row]
                 cell.nameLabel?.text = item.itemName
+                cell.itemId = item.itemID
                 if let price = item.price {
                     cell.priceLabel?.text = "\(price)"
                 }
@@ -344,6 +374,8 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                 }
                 if indexPath.row < matchingAddOns.count {
                     cell.nameLabel.text = matchingAddOns[indexPath.row].adsOnName
+                    cell.itemId = matchingAddOns[indexPath.row].itemID
+                    cell.addOnId = matchingAddOns[indexPath.row].adsOnID
                     if let price = matchingAddOns[indexPath.row].price {
                         cell.priceLabel.text = "\(price)"
                     } else {
@@ -401,6 +433,7 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                 selectedItemPrice = cell.priceLabel?.text
                 subViewLbl.text = selectedItemName
                 subViewPriceLbl.text = selectedItemPrice
+                let itemId = cell.itemId ?? 0
                 // Check if there are any matching add-ons
                 let matchingAddOns = apiResponseAddOns.filter { addOnItem in
                     return addOnItem.itemName == selectedItemName
@@ -408,10 +441,13 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                 if matchingAddOns.isEmpty {
                     hideSubView()
                     let newItem: [String: String] = [
-                        "itemName": selectedItemName ?? "",
-                        "itemPrice": selectedItemPrice ?? "" ,
-                        "itemINCV": String(itemCountinCV)
+                        "Title": selectedItemName ?? "",
+                        "Price": selectedItemPrice ?? "" ,
+                        "Qty": String(itemCountinCV),
+                        "ID": String(itemId),
+                        //"SelectedAddOns": ""
                     ]
+                    
                     var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
                     if let existingItemIndex = savedItems.firstIndex(where: { $0["itemName"] == selectedItemName }) {
                         if let existingItemINCV = Int(savedItems[existingItemIndex]["itemINCV"] ?? "0") {

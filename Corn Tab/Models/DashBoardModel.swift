@@ -1,7 +1,4 @@
-//// This file was generated from JSON Schema using quicktype, do not modify it directly.
-//// To parse the JSON, add this file to your project and do:
-////
-////   let dashBoardModel = try? JSONDecoder().decode(DashBoardModel.self, from: jsonData)
+//
 //
 //import Foundation
 //
@@ -24,7 +21,7 @@
 //    let orderNO: String
 //    let invoiceNo, serviceTypeID, paymentMode: Int
 //    let tableID: String?
-//    let grossAmount: Int
+//    let grossAmount: Double
 //    let coverTable: String
 //    let customerID: Int?
 //    let manualOrderNo: String
@@ -38,9 +35,8 @@
 //    let customerName: String?
 //    let netAmount: Double?
 //    let createDateTime, covers: String
-//    let gstPer: Double?
-//    let bankDiscountID: Int?
-//    let creditCardNo, creditCardAccountTile: JSONNull?
+//    let gstPer, bankDiscountID: Int?
+//    let creditCardNo, creditCardAccountTile: String?
 //    let empDiscountType: Int?
 //    let orderDetail, tableDetail: String?
 //
@@ -80,40 +76,7 @@
 //        case tableDetail = "TableDetail"
 //    }
 //}
-//
-//// MARK: - Encode/decode helpers
-//
-//class JSONNull: Codable, Hashable {
-//
-//    public static func == (lhs: JSONNull, rhs: JSONNull) -> Bool {
-//        return true
-//    }
-//
-//    public var hashValue: Int {
-//        return 0
-//    }
-//
-//    public init() {}
-//
-//    public required init(from decoder: Decoder) throws {
-//        let container = try decoder.singleValueContainer()
-//        if !container.decodeNil() {
-//            throw DecodingError.typeMismatch(JSONNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for JSONNull"))
-//        }
-//    }
-//
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.singleValueContainer()
-//        try container.encodeNil()
-//    }
-//}
 
-
-
-// This file was generated from JSON Schema using quicktype, do not modify it directly.
-// To parse the JSON, add this file to your project and do:
-//
-//   let dashBoardModel = try? JSONDecoder().decode(DashBoardModel.self, from: jsonData)
 
 import Foundation
 
@@ -131,27 +94,27 @@ struct DashBoardModel: Codable {
 }
 // MARK: - Row
 struct Row: Codable {
-    let orderID: Int
+    let orderID: Double
     let orderNO: String
-    let invoiceNo, serviceTypeID, paymentMode: Int
+    let invoiceNo, serviceTypeID, paymentMode: Double
     let tableID: String?
-    let grossAmount: Int
+    let grossAmount: Double
     let coverTable: String
-    let customerID: Int?
+    let customerID: Double?
     let manualOrderNo: String
     let remarks: String?
     let gstAmount: Double?
-    let deliveryChannel, itemWiseDiscount, orderTakeID: Int?
-    let serviceCharges: Int
-    let serviceChargesType, discount: Int?
-    let discountType: Int
-    let bankID, paymentReceived, customerID1: Int?
+    let deliveryChannel, itemWiseDiscount, orderTakeID: Double?
+    let serviceCharges: Double
+    let serviceChargesType, discount: Double?
+    let discountType: Double
+    let bankID, paymentReceived, customerID1: Double?
     let customerName: String?
     let netAmount: Double?
     let createDateTime, covers: String
-    let gstPer, bankDiscountID: Int?
+    let gstPer, bankDiscountID: Double?
     let creditCardNo, creditCardAccountTile: String?
-    let empDiscountType: Int?
+    let empDiscountType: Double?
     let orderDetail, tableDetail: String?
 
     enum CodingKeys: String, CodingKey {

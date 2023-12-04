@@ -118,7 +118,6 @@ class DealsVC: UIViewController {
                 for row in dashboardModel {
                     if let rowDealID = row.dealID, let rowcategoryID = row.categoryID, rowDealID == self.dealId {
                         // Found a match, add the categoryName to the array
-                        print(dealId)
                         if let sectionName = row.categoryName {
                             if !sectionNameToID.keys.contains(sectionName) {
                                 sectionNameToID[sectionName] = rowcategoryID
@@ -280,7 +279,7 @@ class DealsVC: UIViewController {
                 for row in dashboardModel {
                     if let rowDealID = row.dealID, let rowcategoryID = row.categoryID, rowDealID == self.dealId {
                         // Found a match, add the categoryName to the array
-                        print(dealId)
+//                        print(dealId)
                         if let sectionName = row.categoryName {
                             if !sectionNameToID.keys.contains(sectionName) {
                                 sectionNameToID[sectionName] = rowcategoryID
@@ -356,13 +355,10 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             guard segments.selectedSegmentIndex >= 0, segments.selectedSegmentIndex < sectionNames.count else {
                 return 0
             }
-
             let selectedSectionID = sectionNameToID[sectionNames[segments.selectedSegmentIndex]] ?? -1
-            let validItems = apiResponse.filter { item in
-                return item.categoryID == selectedSectionID && item.itemName != nil
-//                && item.price != 0
-//                && item.imagePath != ""
-            }
+                    let validItems = apiResponse.filter { item in
+                        return item.categoryID == selectedSectionID && item.itemName != nil
+                    }
             return validItems.count
         } else if collectionView == addOnscollectionView {
             if let selectedItemName = selectedItemName {
@@ -387,6 +383,7 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             if let count = cellSelectionCounts[indexPath] {
                 cell.qtyLbl.text = "Qty: \(count)"
             }
+            
             guard segments.selectedSegmentIndex < sectionNames.count else {
                 cell.nameLabel?.text = nil
 //                cell.priceLabel?.text = nil
@@ -460,6 +457,9 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
         }
         return CGSize(width: 175, height: 85)
     }
+    
+
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         updateItemSelectedLabel()
         if collectionView == itemcollectionView {
@@ -483,7 +483,7 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             updateItemCountLabel()
             selectedIndexPaths.append(indexPath)
             selectedItemIndexPath = indexPath
-            
+
             if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
                 selectedItemName = cell.nameLabel?.text
                 selectedItemPrice = cell.priceLabel?.text

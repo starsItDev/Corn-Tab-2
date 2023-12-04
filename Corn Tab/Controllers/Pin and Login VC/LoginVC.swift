@@ -21,7 +21,7 @@ class LoginVC: UIViewController {
         super.viewDidLoad()
         textFieldHelper()
         setupEyeButton()
-//    authenticateWithBiometrics()
+        //    authenticateWithBiometrics()
     }
     // MARK: - Actions
     @IBAction func continueBtnTap(_ sender: UIButton) {
@@ -110,8 +110,8 @@ class LoginVC: UIViewController {
         request.httpMethod = "POST"
         request.httpBody = postData
         let loadingAlert = UIAlertController(title: nil, message: "", preferredStyle: .alert)
-            loadingAlert.addActivityIndicator()
-            present(loadingAlert, animated: true, completion: nil)
+        loadingAlert.addActivityIndicator()
+        present(loadingAlert, animated: true, completion: nil)
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data else {
                 print("Data not received.")
@@ -125,8 +125,10 @@ class LoginVC: UIViewController {
                         let accessToken = json["Access_Token"] as? String
                         let userinfo = json["UerInfo"] as? NSDictionary
                         let username = userinfo?["UserName"] as? String
+                        let userId = userinfo?["UserId"] as? Int
                         let distributionName = userinfo?["DistributionName"] as? String
                         let WorkingDate = userinfo?["WorkingDate"] as? String
+                        UserDefaults.standard.set(userId, forKey: "UserId")
                         UserDefaults.standard.set(username, forKey: "UserName")
                         UserDefaults.standard.set(WorkingDate, forKey: "WorkingDate")
                         UserDefaults.standard.set(accessToken, forKey: "Access_Token")

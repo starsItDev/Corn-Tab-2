@@ -12,7 +12,6 @@ class SelectionVC: UIViewController{
     @IBOutlet weak var itemCountTxt: UITextField!
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
-    
     @IBOutlet weak var heightConstraint: NSLayoutConstraint!
     
     //MARK: Var
@@ -27,6 +26,7 @@ class SelectionVC: UIViewController{
     var selectedTableNumbers: [String] = []
     var selectedIndexPaths: Set<IndexPath> = []
     var isSearchBarActive: Bool = false
+    
 
     var filteredData: [MasterDetailRow] = []
     var searchBarValue:[MasterDetailRow] = []
@@ -41,7 +41,8 @@ class SelectionVC: UIViewController{
         UserDefaults.standard.removeObject(forKey: "SelectedTableIDs")
        tableView.isHidden = true
 //        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        print(receivedTableIDs)
+//        print(receivedTableIDs)
+     
     }
     private func setupUI() {
             navigationController?.setNavigationBarHidden(true, animated: false)
@@ -63,8 +64,8 @@ class SelectionVC: UIViewController{
             APIManager.makePOSTRequest { dashboardModelArray in
                 guard dashboardModelArray.count > 1 else {
                     print("Error: dashboardModelArray has insufficient elements.")
-                    loader.stopAnimating()
-                    loader.removeFromSuperview()
+//                    loader.stopAnimating()
+//                    loader.removeFromSuperview()
                     return
                 }
                 self.searchBarValue = dashboardModelArray[0]
@@ -169,10 +170,9 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
                 let item = sectionItems[indexPath.row]
                 if !receivedTableIDs.contains("\(item.tableID ?? 0)"){
                     cell.tableNumberLbl?.text = item.tableNo
-                    print(item.tableNo)
                 }
                 if receivedTableIDs.contains("\(item.tableID ?? 0)"){
-                    print(item.tableNo)
+//                    print(item.tableNo)
                 }
             }
             if selectedIndexPaths.contains(indexPath) {

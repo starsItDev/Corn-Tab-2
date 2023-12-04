@@ -11,9 +11,13 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        print("Asdcfsadcxcvzxv")
+    
           UserDefaults.standard.removeObject(forKey: "addedItems")
           UserDefaults.standard.removeObject(forKey: "parsedDataKey")
+        
+        
+        
+        UserDefaults.standard.removeObject(forKey: "TableContent")
 //        if let launchOptions = launchOptions,
 //                launchOptions[UIApplication.LaunchOptionsKey.annotation] == nil {
 //                // This means the app was terminated and is being launched fresh
