@@ -242,10 +242,10 @@ class DealsVC: UIViewController {
             titleWithPrice = "\(title) - (\(basePriceText))"
         }
         let newItem: [String: String] = [
-            "title": titleWithPrice,
-            "quantity": quantity,
-            "price" : "\(totalPrice)",
-            "selectedAddOns": selectedAddOnsString,
+            "Title": titleWithPrice,
+            "Qty": quantity,
+            "Price" : "\(totalPrice)",
+            "SelectedAddOns": selectedAddOnsString,
         ]
         var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
         savedItems.append(newItem)
