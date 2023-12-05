@@ -23,7 +23,6 @@ class DineInVC: UIViewController{
     @IBOutlet weak var categoriesButton: UIButton!
     @IBOutlet weak var dealsButton: UIButton!
     @IBOutlet weak var containerDealsView: UIView!
-    
     @IBOutlet weak var timeLbl: UILabel!
     
     //MARK: Properties

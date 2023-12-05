@@ -21,9 +21,6 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var dateLbl: UILabel!
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var pendingOrder: UILabel!
-    @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    
     //MARK: Variables
     var tableIDs: [String] = []
     var isActivityIndicatorVisible = false
@@ -35,6 +32,8 @@ class TabBarVC: UIViewController {
     var workingDate = ""
     var dataSource: [Row] = []
     var timer: Timer?
+    var refreshControl: UIRefreshControl!
+
     //MARK: Override Func
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,27 +43,19 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
-        scrollView.delegate = self
-
+        // Initialize UIRefreshControl
+           refreshControl = UIRefreshControl()
+           refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+           collectionView.refreshControl = refreshControl
     }
     override func viewWillAppear(_ animated: Bool) {
         makePOSTRequest()
     }
-    // Update the toggleActivityIndicator function
-    func toggleActivityIndicator(_ shouldStart: Bool) {
-        if shouldStart {
-            activityIndicator.startAnimating()
-        } else {
-            activityIndicator.stopAnimating()
-//            activityIndicator.isHidden = true
-        }
-        isActivityIndicatorVisible = shouldStart
-    }
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let isAtTop = scrollView.contentOffset.y <= 0
+    @objc func refreshData() {
+        // Perform your data refresh logic here, for example, make the POST request again
         makePOSTRequest()
-        toggleActivityIndicator(isAtTop)
     }
+
     @IBAction func tableViewBtn(_ sender: UIButton) {
         tableView.isHidden = false
         collectionView.isHidden = true
@@ -249,12 +240,10 @@ extension TabBarVC {
                         self.tableIDs = dashboardModel.compactMap { $0.tableID }
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
-                        self.toggleActivityIndicator(false)
-                        self.activityIndicator.isHidden = true
+                        self.refreshControl.endRefreshing()
                     }
                 } catch let error {
                     print("Error decoding API response: \(error)")
-                    self.toggleActivityIndicator(false)
                 }
             }
             task.resume()

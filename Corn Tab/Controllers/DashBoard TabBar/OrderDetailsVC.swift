@@ -19,7 +19,6 @@ class OrderDetailsVC: UIViewController {
     @IBOutlet weak var tableCoverNoLbl: UILabel!
     @IBOutlet weak var orderNoLbl: UILabel!
     @IBOutlet weak var placeOrderBtn: UIButton!
-    
     // MARK: - Var
     var addedItems: [[String: String]] = []
     var itemCounts: [Int] = []
@@ -41,9 +40,6 @@ class OrderDetailsVC: UIViewController {
         updateDateAndTimeLabels()
         if let username = UserDefaults.standard.string(forKey: "UserName") {
             orderTakerNameLbl.text = username
-        }
-        if let workingDate = UserDefaults.standard.string(forKey: "WorkingDate") {
-            dateLbl.text = workingDate
         }
         let buttonText = updatedButtonText ?? "Place Order"
         placeOrderBtn.setTitle(buttonText, for: .normal)
@@ -72,10 +68,6 @@ class OrderDetailsVC: UIViewController {
                   if let orderNo = tableContent["OrderNo"] as? String{
                       orderNoLbl.text = orderNo
                   }
-                  if let date = tableContent["Date"] as? String{
-                      dateLbl.text = date
-                  }
-                  
                   if  let time = tableContent["Time"] as? String{
                       let dateFormatter = DateFormatter()
                       dateFormatter.dateFormat = "HH:mm:ss.SSS"
@@ -110,13 +102,27 @@ class OrderDetailsVC: UIViewController {
           }
       }
       // MARK: - Private Methods
-      func updateDateAndTimeLabels() {
-          let currentDate = Date()
-          let timeFormatter = DateFormatter()
-          timeFormatter.dateFormat = "hh:mm a" // Customize the time format as needed
-          let timeString = timeFormatter.string(from: currentDate)
-          timeLbl.text = timeString
-      }
+    private func updateDateAndTimeLabels() {
+        let currentDate = Date()
+        
+        // Format date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+        let formattedDate = dateFormatter.string(from: currentDate)
+        dateLbl.text = formattedDate
+        
+        // Format time
+        dateFormatter.dateFormat = "h:mm a"
+        let formattedTime = dateFormatter.string(from: currentDate)
+        timeLbl.text = formattedTime
+    }
+//      func updateDateAndTimeLabels() {
+//          let currentDate = Date()
+//          let timeFormatter = DateFormatter()
+//          timeFormatter.dateFormat = "hh:mm a" // Customize the time format as needed
+//          let timeString = timeFormatter.string(from: currentDate)
+//          timeLbl.text = timeString
+//      }
       @objc func eidtBtnTapped(sender: UIButton) {
           guard let tabBarController = self.tabBarController else {
               return
