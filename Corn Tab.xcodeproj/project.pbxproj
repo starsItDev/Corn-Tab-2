@@ -59,6 +59,7 @@
 		76B419232A7121B500F79DC3 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B419222A7121B500F79DC3 /* APIManager.swift */; };
 		76B8C1C32AD5533D00283E0B /* DealsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B8C1C22AD5533D00283E0B /* DealsVC.swift */; };
 		76B8E4E02A6E8F8400E26B68 /* DashBoardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B8E4DF2A6E8F8400E26B68 /* DashBoardModel.swift */; };
+		76EE850D2B1EFE7E0018B75A /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EE850C2B1EFE7E0018B75A /* File.swift */; };
 		76F1009B2A6959C0002E1AFB /* PinModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76F1009A2A6959C0002E1AFB /* PinModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -113,6 +114,7 @@
 		76B419222A7121B500F79DC3 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		76B8C1C22AD5533D00283E0B /* DealsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealsVC.swift; sourceTree = "<group>"; };
 		76B8E4DF2A6E8F8400E26B68 /* DashBoardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashBoardModel.swift; sourceTree = "<group>"; };
+		76EE850C2B1EFE7E0018B75A /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		76F1009A2A6959C0002E1AFB /* PinModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -139,6 +141,7 @@
 				7642C3402A5EB1F700A4C7C3 /* OrderDetailsVC.swift */,
 				7642C3422A5EB21400A4C7C3 /* DineInVC.swift */,
 				76B8C1C22AD5533D00283E0B /* DealsVC.swift */,
+				76EE850C2B1EFE7E0018B75A /* File.swift */,
 				7642C3472A5EB78D00A4C7C3 /* CollectionViewCell */,
 				7642C3462A5EB78100A4C7C3 /* TableViewCell */,
 			);
@@ -425,6 +428,7 @@
 				7609FA0A2A9E294800E8808B /* AddOnsDineCVCell.swift in Sources */,
 				76B3D2542B1072F400D6FAFF /* OrderItem.swift in Sources */,
 				768112B52A6526E700B19881 /* DashboardTVCell.swift in Sources */,
+				76EE850D2B1EFE7E0018B75A /* File.swift in Sources */,
 				768D79532A8DF52B00030A12 /* Coredata.xcdatamodeld in Sources */,
 				760BE5432ABC7C7F008BCBCD /* Indicator.swift in Sources */,
 				7687CAA72A5D79AA007CEFC9 /* ResetPasswordVC.swift in Sources */,

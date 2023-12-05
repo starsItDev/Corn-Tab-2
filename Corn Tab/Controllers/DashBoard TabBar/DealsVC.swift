@@ -43,7 +43,7 @@ class DealsVC: UIViewController {
     var selectedItemName: String?
     var selectedItemPrice: String?
     var itemCountinCV = 1
-    var itemCount = 0
+    var itemCount = 1
     var categoryNamesForDeal: [String] = []
     var apiResponse: [MasterDetailRow] = []
     var apiResponseAddOns: [MasterDetailRow] = []
@@ -144,7 +144,7 @@ class DealsVC: UIViewController {
                 }
             }
             // UI updates can be performed here
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
                 self.segments.removeAllSegments()
                 self.sectionNameToID = sectionNameToID
                 for (index, sectionName) in self.sectionNamesQTY.enumerated() {
@@ -153,7 +153,7 @@ class DealsVC: UIViewController {
                 self.segments.selectedSegmentIndex = 0
                 self.itemcollectionView.reloadData()
                 self.addOnscollectionView.reloadData()
-            }
+//            }
             clearSelectedCells()
             selectedIndexPaths.removeAll()
             cellSelectionCounts.removeAll()
@@ -165,7 +165,7 @@ class DealsVC: UIViewController {
                     // If there were previously selected cells for this segment, store them in cellSelectionCounts.
                     cellSelectionCounts = cellCounts
                 }
-            itemCount = 0
+            itemCount = 1
             updateItemCountLabel()
             itemcollectionView.reloadData()
             addOnscollectionView.reloadData()
@@ -187,7 +187,7 @@ class DealsVC: UIViewController {
                 // If there were previously selected cells for this segment, store them in cellSelectionCounts.
                 cellSelectionCounts = cellCounts
             }
-        itemCount = 0
+        itemCount = 1
         updateItemCountLabel()
         itemcollectionView.reloadData()
         addOnscollectionView.reloadData()
@@ -259,7 +259,7 @@ class DealsVC: UIViewController {
             addOnscollectionView.reloadData()
         }
     @IBAction func minusButton(_ sender: UIButton) {
-        itemCount = max(0, itemCount - 1)
+        itemCount = max(1, itemCount - 1)
         updateItemCountLabel()
     }
     @IBAction func plusButton(_ sender: UIButton) {
@@ -276,7 +276,10 @@ class DealsVC: UIViewController {
         }
         // Move your API response processing logic here
         var sectionNameToID: [String: Int] = [:]
-        
+        guard self.parsedRows.count > 6 else {
+                // Handle the case where parsedRows doesn't have enough elements
+                return
+            }
         let rowItemData = self.parsedRows[6]
         let addOnsItemData = self.parsedRows[7]
         
@@ -311,7 +314,7 @@ class DealsVC: UIViewController {
         }
 //        segmentsFirstDeals.selectedSegmentIndex = 0
         // UI updates can be performed here
-        DispatchQueue.main.async {
+//        DispatchQueue.main.async {
             self.apiResponse = rowItemData
             self.apiResponseAddOns = addOnsItemData
             self.segments.removeAllSegments()
@@ -323,7 +326,7 @@ class DealsVC: UIViewController {
             self.itemcollectionView.reloadData()
             self.addOnscollectionView.reloadData()
           
-        }
+//        }
     }
     func clearSelectedCells() {
         for indexPath in selectedIndexPaths {
@@ -360,20 +363,23 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             guard segments.selectedSegmentIndex >= 0, segments.selectedSegmentIndex < sectionNames.count else {
                 return 0
             }
+
             let selectedSectionID = sectionNameToID[sectionNames[segments.selectedSegmentIndex]] ?? -1
-                    let validItems = apiResponse.filter { item in
-                        return item.categoryID == selectedSectionID && item.itemName != nil
-                    }
+            let validItems = apiResponse.filter { item in
+                return item.categoryID == selectedSectionID && item.itemName != nil
+            }
             return validItems.count
         } else if collectionView == addOnscollectionView {
-            if let selectedItemName = selectedItemName {
-                let matchingAddOns = apiResponseAddOns.filter { $0.itemName == selectedItemName && $0.adsOnName != nil }
-                return matchingAddOns.count
-            } else {
-                // Handle the case where selectedItemName is not set
+            // Check if selectedItemName is set
+            guard let selectedItemName = selectedItemName else {
                 return 0
             }
+
+            // Filter matching add-ons based on selectedItemName
+            let matchingAddOns = apiResponseAddOns.filter { $0.itemName == selectedItemName && $0.adsOnName != nil }
+            return matchingAddOns.count
         }
+
         return 0
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -462,8 +468,6 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
         }
         return CGSize(width: 175, height: 85)
     }
-    
-
 
     //collectionview didSelect in DealsVC
 
@@ -486,7 +490,7 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                 }
                 hideSubView()
                 showSubView()
-                itemCount = 0
+                itemCount = 1
                 updateItemCountLabel()
                 selectedIndexPaths.append(indexPath)
                 selectedItemIndexPath = indexPath
@@ -555,7 +559,10 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                 } else {
                     selectedAddOnIndexPaths.insert(indexPath)
                 }
-                collectionView.reloadItems(at: [indexPath])
+                DispatchQueue.main.async {
+                    collectionView.reloadItems(at: [indexPath])
+                }
+
             }
         }
 }

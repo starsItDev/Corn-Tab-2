@@ -22,11 +22,11 @@ class TabBarVC: UIViewController {
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var pendingOrder: UILabel!
     @IBOutlet weak var scrollView: UIScrollView!
-    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     //MARK: Variables
     var tableIDs: [String] = []
-    var activityIndicator: UIActivityIndicatorView!
+    var isActivityIndicatorVisible = false
     var orderDetail = [String]()
     var tableDetail = [String]()
     var customerIDsString = ""
@@ -44,12 +44,27 @@ class TabBarVC: UIViewController {
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
         startTimer()
-        
+        scrollView.delegate = self
+
     }
     override func viewWillAppear(_ animated: Bool) {
         makePOSTRequest()
     }
-  
+    // Update the toggleActivityIndicator function
+    func toggleActivityIndicator(_ shouldStart: Bool) {
+        if shouldStart {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+//            activityIndicator.isHidden = true
+        }
+        isActivityIndicatorVisible = shouldStart
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let isAtTop = scrollView.contentOffset.y <= 0
+        makePOSTRequest()
+        toggleActivityIndicator(isAtTop)
+    }
     @IBAction func tableViewBtn(_ sender: UIButton) {
         tableView.isHidden = false
         collectionView.isHidden = true
@@ -194,14 +209,11 @@ class TabBarVC: UIViewController {
 //MARK: Helper function to make POST request
 extension TabBarVC {
     func  makePOSTRequest() {
-        // Define the API endpoint URL
         let endpoint = APIConstants.Endpoints.dashBoard
         let urlString = APIConstants.baseURL + endpoint
         guard let apiUrl = URL(string: urlString) else {
-//            print("Invalid URL.")
             return
         }
-        // Define the request parameters as a dictionary
         let parameters: [String: Any] = [
             "SpName": "uspGetPendingOrderOfflineMode",
             "Parameters": [
@@ -232,18 +244,17 @@ extension TabBarVC {
                     self.dataSource = dashboardModel
                     DispatchQueue.main.async {
                         let date = dashboardModel.first?.createDateTime.components(separatedBy: "T")
-                        print(date?[1] ?? "")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
                         self.tableIDs = dashboardModel.compactMap { $0.tableID }
-                        
-                        // Print or use the array as needed
-//                        print("TableIDs: \(self.tableIDs)")
                         self.collectionView.reloadData()
                         self.tableView.reloadData()
+                        self.toggleActivityIndicator(false)
+                        self.activityIndicator.isHidden = true
                     }
                 } catch let error {
                     print("Error decoding API response: \(error)")
+                    self.toggleActivityIndicator(false)
                 }
             }
             task.resume()

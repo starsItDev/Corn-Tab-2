@@ -45,8 +45,8 @@ class OrderDetailsVC: UIViewController {
         if let workingDate = UserDefaults.standard.string(forKey: "WorkingDate") {
             dateLbl.text = workingDate
         }
-        placeOrderBtn.setTitle(updatedButtonText, for: .normal)
-
+        let buttonText = updatedButtonText ?? "Place Order"
+        placeOrderBtn.setTitle(buttonText, for: .normal)
     }
     override func viewWillAppear(_ animated: Bool) {
           addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []

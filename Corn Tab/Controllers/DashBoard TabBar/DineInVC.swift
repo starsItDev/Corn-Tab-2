@@ -23,7 +23,11 @@ class DineInVC: UIViewController{
     @IBOutlet weak var categoriesButton: UIButton!
     @IBOutlet weak var dealsButton: UIButton!
     @IBOutlet weak var containerDealsView: UIView!
+    
+    @IBOutlet weak var timeLbl: UILabel!
+    
     //MARK: Properties
+    var timer: Timer?
     var selectedIndexPathsForSegments: [Int: [IndexPath]] = [:]
     var cellSelectionCountsForSegments: [Int: [IndexPath: Int]] = [:]
     var cellSelectionCounts: [IndexPath: Int] = [:]
@@ -44,7 +48,7 @@ class DineInVC: UIViewController{
     var selectedItemName: String?
     var selectedItemPrice: String?
     var itemCountinCV = 1
-    var itemCount = 0
+    var itemCount = 1
     
     var apiResponse: [MasterDetailRow] = []
     var apiResponseAddOns: [MasterDetailRow] = []
@@ -64,6 +68,7 @@ class DineInVC: UIViewController{
         userDefaults()
     }
     override func viewWillAppear(_ animated: Bool) {
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateTimeLabel), userInfo: nil, repeats: true)
         if let labelText = receivedLabelText {
             tableNoLbl.text = ": \(labelText)"
         }
@@ -85,17 +90,33 @@ class DineInVC: UIViewController{
         flowLayout.invalidateLayout()
     }
     // MARK: Actions
+    @objc func updateTimeLabel() {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh:mm a"
+            let currentTimeString = formatter.string(from: Date())
+            timeLbl.text = " \(currentTimeString)"
+        }
     func userDefaults() {
         if let savedData = UserDefaults.standard.data(forKey: "parsedDataKey"),
            let rows = try? JSONDecoder().decode([[MasterDetailRow]].self, from: savedData) {
             self.parsedRows = rows
         } else {
             // Handle the case where no data is saved in UserDefaults
+            return
         }
+
         // Move your API response processing logic here
         var sectionNameToID: [String: Int] = [:]
-        let rowItemData = self.parsedRows[6] // Assuming you want to use data from parsedRows
+        
+        // Check if parsedRows has enough elements
+        guard self.parsedRows.count > 6 else {
+            // Handle the case where parsedRows doesn't have enough elements
+            return
+        }
+
+        let rowItemData = self.parsedRows[6]
         let addOnsItemData = self.parsedRows[7]
+
         for dashboardModel in self.parsedRows {
             for row in dashboardModel {
                 if let sectionID = row.categoryID, let sectionName = row.category {
@@ -109,6 +130,7 @@ class DineInVC: UIViewController{
                 }
             }
         }
+
         // UI updates can be performed here
         DispatchQueue.main.async {
             self.apiResponse = rowItemData
@@ -123,6 +145,7 @@ class DineInVC: UIViewController{
             self.addOnscollectionView.reloadData()
         }
     }
+
     @IBAction func segmentController(_ sender: UISegmentedControl) {
         let selectedSegmentIndex = sender.selectedSegmentIndex
         let segmentWidth = scrollView.contentSize.width / CGFloat(segments.numberOfSegments - 1)
@@ -144,7 +167,7 @@ class DineInVC: UIViewController{
                 cellSelectionCounts = cellCounts
             }
         scrollView.setContentOffset(CGPoint(x: xOffset, y: 0), animated: true)
-        itemCount = 0
+        itemCount = 1
         updateItemCountLabel()
         itemcollectionView.reloadData()
         addOnscollectionView.reloadData()
@@ -423,7 +446,7 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
             }
             hideSubView()
             showSubView()
-            itemCount = 0
+            itemCount = 1
             updateItemCountLabel()
             selectedIndexPaths.append(indexPath)
             selectedItemIndexPath = indexPath

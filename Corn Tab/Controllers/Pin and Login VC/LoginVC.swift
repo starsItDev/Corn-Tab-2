@@ -21,7 +21,7 @@ class LoginVC: UIViewController {
         super.viewDidLoad()
         textFieldHelper()
         setupEyeButton()
-        //    authenticateWithBiometrics()
+        authenticateWithBiometrics()
     }
     // MARK: - Actions
     @IBAction func continueBtnTap(_ sender: UIButton) {
@@ -145,6 +145,7 @@ class LoginVC: UIViewController {
                     } else {
                         DispatchQueue.main.async {
                             self.showAlert(title: "Alert", message: "Invalid username or password")
+                            loadingAlert.dismiss(animated: true, completion: nil)
                         }
                     }
                 }
