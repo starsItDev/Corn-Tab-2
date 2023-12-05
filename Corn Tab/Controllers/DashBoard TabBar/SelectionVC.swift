@@ -40,9 +40,6 @@ class SelectionVC: UIViewController{
         itemCountTxt.keyboardType = .numberPad
         UserDefaults.standard.removeObject(forKey: "SelectedTableIDs")
        tableView.isHidden = true
-//        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-//        print(receivedTableIDs)
-     
     }
     private func setupUI() {
             navigationController?.setNavigationBarHidden(true, animated: false)
@@ -63,7 +60,7 @@ class SelectionVC: UIViewController{
             
             APIManager.makePOSTRequest { dashboardModelArray in
                 guard dashboardModelArray.count > 1 else {
-                    print("Error: dashboardModelArray has insufficient elements.")
+//                    print("Error: dashboardModelArray has insufficient elements.")
 //                    loader.stopAnimating()
 //                    loader.removeFromSuperview()
                     return
@@ -80,7 +77,7 @@ class SelectionVC: UIViewController{
                             if let itemID = row.floorID {
                                 self.itemIDToSectionID[itemID] = sectionID
                             }
-                                print(self.searchBarValue)
+//                                print(self.searchBarValue)
                         }
                     }
                 }

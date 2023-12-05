@@ -47,6 +47,8 @@ class TabBarVC: UIViewController {
            refreshControl = UIRefreshControl()
            refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
            collectionView.refreshControl = refreshControl
+        tableView.refreshControl = refreshControl
+
     }
     override func viewWillAppear(_ animated: Bool) {
         makePOSTRequest()

@@ -133,14 +133,25 @@ class LoginVC: UIViewController {
                         UserDefaults.standard.set(WorkingDate, forKey: "WorkingDate")
                         UserDefaults.standard.set(accessToken, forKey: "Access_Token")
                         UserInfo.shared.isUserLoggedIn = true
+                        //                        DispatchQueue.main.async {
+                        //                            loadingAlert.dismiss(animated: true, completion: nil)
+                        //                            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                        //                            let nextVC = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as! TabBarVC
+                        //                            nextVC.userName = username ?? ""
+                        //                            nextVC.distributionName = distributionName ?? ""
+                        //                            nextVC.workingDate = WorkingDate ?? ""
+                        //                            self.navigationController?.pushViewController(nextVC, animated: true)
+                        //                        }
+                        
                         DispatchQueue.main.async {
-                            loadingAlert.dismiss(animated: true, completion: nil)
-                            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                            let nextVC = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as! TabBarVC
-                            nextVC.userName = username ?? ""
-                            nextVC.distributionName = distributionName ?? ""
-                            nextVC.workingDate = WorkingDate ?? ""
-                            self.navigationController?.pushViewController(nextVC, animated: true)
+                            loadingAlert.dismiss(animated: true, completion: {
+                                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                                let nextVC = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as! TabBarVC
+                                nextVC.userName = username ?? ""
+                                nextVC.distributionName = distributionName ?? ""
+                                nextVC.workingDate = WorkingDate ?? ""
+                                self.navigationController?.pushViewController(nextVC, animated: true)
+                            })
                         }
                     } else {
                         DispatchQueue.main.async {
