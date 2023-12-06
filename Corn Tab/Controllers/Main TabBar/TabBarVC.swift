@@ -153,7 +153,7 @@ class TabBarVC: UIViewController {
              }
              let coverTable = dataSource[sender.tag].coverTable
              let orderNo = dataSource[sender.tag].orderNO
-             let dateTime = dataSource[sender.tag].createDateTime.split(separator: "T")
+             let dateTime = dataSource[sender.tag].createDateTime?.split(separator: "T")
              let jsonForTable = self.tableDetail[sender.tag].data(using: .utf8)
              do{
                  let tableItems = try JSONDecoder().decode([TableItem].self, from: jsonForTable!)
@@ -166,8 +166,8 @@ class TabBarVC: UIViewController {
                          "OrderNo": orderNo ?? "",
                          "TableCover": coverTable ?? "",
                          "TableName" : tableName ?? "",
-                         "Date": String(dateTime[0]),
-                         "Time": String(dateTime[1]),
+                         "Date": String(dateTime?[0] ?? ""),
+                         "Time": String(dateTime?[1] ?? ""),
                          "isEdit": "\(true)"
                      ]
                      UserDefaults.standard.set(newItem, forKey: "TableContent")
@@ -234,7 +234,7 @@ extension TabBarVC {
                     let pendingOrder = try decoder.decode(DashBoardModel.self, from: data).totalLength
                     self.dataSource = dashboardModel
                     DispatchQueue.main.async {
-                        let date = dashboardModel.first?.createDateTime.components(separatedBy: "T")
+                        let date = dashboardModel.first?.createDateTime?.components(separatedBy: "T")
                         self.dateLbl.text = date?[0] ?? ""
                         self.pendingOrder.text = "\(pendingOrder)"
                         self.tableIDs = dashboardModel.compactMap { $0.tableID }
@@ -269,28 +269,28 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
             cell.tableNoLbl.text = ""
         }
         cell.orderNoLbl.text = rowData.orderNO
-        var date = rowData.createDateTime.components(separatedBy: "T")
+        var date = rowData.createDateTime?.components(separatedBy: "T")
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm:ss.SSS"
-        if let newTime = timeFormatter.date(from: date[1]){
+        if let newTime = timeFormatter.date(from: date?[1] ?? ""){
             timeFormatter.dateFormat = "h:mm a"
             if let formatedTime = timeFormatter.string(for: newTime) {
-                date[1] = formatedTime
+                date?[1] = formatedTime
                     } else {
                         print("Failed to format time.")
                     }
         }
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
-        if let newDate = dateFormatter.date(from: date[0]){
+        if let newDate = dateFormatter.date(from: date?[0] ?? ""){
             dateFormatter.dateFormat = "dd-MM-yyyy"
             if let formatedDate = dateFormatter.string(for: newDate) {
-                date[0] = formatedDate
+                date?[0] = formatedDate
                     } else {
                         print("Failed to format time.")
                     }
         }
-        cell.timeLbl.text = date[0] + " " + date[1]
+        cell.timeLbl.text = (date?[0] ?? "") + " " + (date?[1] ?? "")
         //        cell.tableNoLbl.text = rowData.tableDetail
         self.orderDetail.append(rowData.orderDetail ?? "")
         self.tableDetail.append(rowData.tableDetail ?? "")
@@ -329,8 +329,8 @@ extension TabBarVC: UITableViewDelegate, UITableViewDataSource {
             cell.tableNoLbl.text = "" // Handle invalid JSON data or missing TableName
         }
         cell.orderNoLbl.text = rowData.orderNO
-        let date = rowData.createDateTime.components(separatedBy: "T")
-        cell.timeLbl.text = date[0] + " " + date[1]
+        let date = rowData.createDateTime?.components(separatedBy: "T")
+        cell.timeLbl.text = (date?[0] ?? "") + " " + (date?[1] ?? "")
         //cell.timeLbl.text = rowData.createDateTime
         //        cell.tableNoLbl.text = rowData.tableDetail
         let spacing: CGFloat = 20
