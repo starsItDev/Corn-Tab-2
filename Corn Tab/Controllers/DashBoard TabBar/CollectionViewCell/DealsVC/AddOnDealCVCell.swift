@@ -11,4 +11,6 @@ class AddOnDealCVCell: UICollectionViewCell {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
     @IBOutlet weak var cellView: UIView!
+    
+    var itemId: Int?
 }

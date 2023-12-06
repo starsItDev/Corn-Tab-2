@@ -203,8 +203,8 @@ class OrderDetailsVC: UIViewController {
       }
       private func calculateAndUpdateTotal() {
           self.subtotalPrice = addedItems.reduce(0.0) { result, item in
-              let priceKey = item["itemINCV"] != nil ? "itemPrice" : "Price"
-              let quantityKey = item["itemINCV"] != nil ? "itemINCV" : "Qty"
+              let priceKey = item["Price"] != nil ? "Price" : "Price"
+              let quantityKey = item["Qty"] != nil ? "Qty" : "Qty"
               let price = Double(item[priceKey] ?? "0") ?? 0.0
               let quantity = Int(item[quantityKey] ?? "0") ?? 0
               return result + (price * Double(quantity))
@@ -227,49 +227,66 @@ class OrderDetailsVC: UIViewController {
           return addedItems.count
       }
       func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-          let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! OrderDetailsTVCell
-          cell.deleteCellBtn.tag = indexPath.row
-          cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
-          cell.plusbtn.tag = indexPath.row
-          cell.plusbtn.addTarget(self, action: #selector(plusBtnTapped(sender:)), for: .touchUpInside)
-          cell.minBtn.tag = indexPath.row
-          cell.minBtn.addTarget(self, action: #selector(minBtnTapped(sender:)), for: .touchUpInside)
-          cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(sender:)), for: .touchUpInside)
-          let item = addedItems[indexPath.row]
-  //        if let title = item["title"], !title.isEmpty {
-  //            cell.titleLbl.text = title
-  //            titleLabelTexts.append(title) // Store the value in the array
-  //        } else if let itemName = item["itemName"], !itemName.isEmpty {
-  //            cell.titleLbl.text = itemName
-  //            titleLabelTexts.append(itemName) // Store the value in the array
-  //        }
-          if let title = item["Title"], !title.isEmpty {
-              cell.titleLbl.text = title
-              titleLabelText = title // Store the value in the property
-          } else if let itemName = item["itemName"], !itemName.isEmpty {
-              cell.titleLbl.text = itemName
-              titleLabelText = itemName // Store the value in the property
-          }
-          if let price = item["Price"], !price.isEmpty {
-              cell.priceLbl.text = "PKR: " + price
-              titlePrice = price
-          } else if let itemPrice = item["itemPrice"], !itemPrice.isEmpty {
-              cell.priceLbl.text = "PKR: " + itemPrice
-              titlePrice = itemPrice
-          } else if let basePrice = item["BasePrice"], !basePrice.isEmpty {
-              cell.priceLbl.text = "PKR: " + basePrice
-              titlePrice = basePrice
-          }
-          if let item = item["Qty"], !item.isEmpty {
-              cell.quantityLbl.text =  item
-              quantity = item
-          } else if let itemcount = item["itemINCV"], !itemcount.isEmpty {
-              cell.quantityLbl.text = itemcount
-              quantity = itemcount
-          }
-          cell.addOnItemDLbl.text = item["SelectedAddOns"]
-          return cell
-      }
+                let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! OrderDetailsTVCell
+                cell.deleteCellBtn.tag = indexPath.row
+                cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
+                cell.plusbtn.tag = indexPath.row
+                cell.plusbtn.addTarget(self, action: #selector(plusBtnTapped(sender:)), for: .touchUpInside)
+                cell.minBtn.tag = indexPath.row
+                cell.minBtn.addTarget(self, action: #selector(minBtnTapped(sender:)), for: .touchUpInside)
+                cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(sender:)), for: .touchUpInside)
+                let item = addedItems[indexPath.row]
+                if let isDeals = item["isDeals"], !isDeals.isEmpty{
+                    if isDeals == "true"{
+                        if let dealName = item["DealName"], !dealName.isEmpty{
+                            cell.titleLbl.text = dealName
+                        }
+                        if let qty = item["Qty"], !qty.isEmpty {
+                            cell.quantityLbl.text =  qty
+                        }
+                        if let price = item["Price"], !price.isEmpty {
+                            cell.priceLbl.text = "PKR: " + price
+                            titlePrice = price
+                        } else if let itemPrice = item["itemPrice"], !itemPrice.isEmpty {
+                            cell.priceLbl.text = "PKR: " + itemPrice
+                            titlePrice = itemPrice
+                        } else if let basePrice = item["BasePrice"], !basePrice.isEmpty {
+                            cell.priceLbl.text = "PKR: " + basePrice
+                            titlePrice = basePrice
+                        }
+                        cell.addOnItemDLbl.text = item["SelectedAddOns"]
+                    }
+                }
+                else{
+                    if let title = item["Title"], !title.isEmpty {
+                        cell.titleLbl.text = title
+                        titleLabelText = title // Store the value in the property
+                    } else if let itemName = item["itemName"], !itemName.isEmpty {
+                        cell.titleLbl.text = itemName
+                        titleLabelText = itemName // Store the value in the property
+                    }
+                    if let price = item["Price"], !price.isEmpty {
+                        cell.priceLbl.text = "PKR: " + price
+                        titlePrice = price
+                    } else if let itemPrice = item["itemPrice"], !itemPrice.isEmpty {
+                        cell.priceLbl.text = "PKR: " + itemPrice
+                        titlePrice = itemPrice
+                    } else if let basePrice = item["BasePrice"], !basePrice.isEmpty {
+                        cell.priceLbl.text = "PKR: " + basePrice
+                        titlePrice = basePrice
+                    }
+                    if let item = item["Qty"], !item.isEmpty {
+                        cell.quantityLbl.text =  item
+                        quantity = item
+                    } else if let itemcount = item["itemINCV"], !itemcount.isEmpty {
+                        cell.quantityLbl.text = itemcount
+                        quantity = itemcount
+                    }
+                    cell.addOnItemDLbl.text = item["SelectedAddOns"]
+                    
+                }
+                return cell
+            }
             func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
                 return UITableView.automaticDimension
             }
@@ -338,21 +355,6 @@ class OrderDetailsVC: UIViewController {
                           }
                       }
                       itemDict["AddOns"] = addOnArr
-  //                    if let addOns = UserDefaults.standard.array(forKey: "selectedAddOnInfo") as? [[String: Any]]{
-  //                        for addOnItem in addOns{
-  //                            let itemId = addOnItem["itemId"] as? [Int]
-  //                            if ((itemId?.contains(itemDict["ID"] as! Int)) != nil){
-  //                                addOnDict["ID"] = addOnItem["addOnId"] as? Int
-  //                                addOnDict["Name"] = addOnItem["addOnName"]
-  //                                addOnDict["Qty"] = 1
-  //                                addOnDict["ModifierParentRowID"] = modifierParentRowID
-  //                                addOnDict["ItemWiseGST"] = 0
-  //                                addOnDict["Price"] = addOnItem["addOnPrice"]
-  //                                addOnArr.append(addOnDict)
-  //                            }
-  //                        }
-  //                    }
-  //                    itemDict["AddOns"] = addOnArr
                   }
                   
                   modifierParentRowID += 1
@@ -408,113 +410,3 @@ class OrderDetailsVC: UIViewController {
           }
       }
   }
-
-  //extension OrderDetailsVC {
-  //    func makePOSTRequest() {
-  //        if let selectedTableID = UserDefaults.standard.string(forKey: "SelectedTableIDs"),
-  //            let coverTableText = Int(tableCoverNoLbl.text!),
-  //            let titleText = titleLabelText,
-  //            let titlePrice = Int(titlePrice!),
-  //            let quantityCount = Int(quantity!) {
-  //
-  //            var parameters = [String: Any]()
-  //            var parametersDict = [String: Any]()
-  //            parametersDict["DistributorID"] = "1"
-  //            var jsonStringDict = [String: Any]()
-  //            var ordersArray = [[String: Any]]()
-  //
-  //            var orderDict = [String: Any]()
-  //            orderDict["OrderID"] = "temp#1695381299092"
-  //            orderDict["ServiceTypeID"] = 1
-  //            orderDict["UserID"] = 2
-  //            orderDict["TableID"] = selectedTableID
-  //            orderDict["GrossAmount"] = 2500
-  //            orderDict["IsHold"] = 1
-  //            orderDict["CoverTable"] = coverTableText
-  //
-  //            var itemsArray = [[String: Any]]()
-  //
-  //            // Create and append the first item dictionary
-  //            var itemDict1 = [String: Any]()
-  //            itemDict1["ID"] = 9
-  //            itemDict1["Name"] = titleText
-  //            itemDict1["Price"] = titlePrice
-  //            itemDict1["Qty"] = quantityCount
-  //            itemDict1["Discount"] = 0
-  //            itemDict1["IsUnGroup"] = false
-  //            itemDict1["SectionName"] = "Kitchen"
-  //            itemDict1["ItemWiseGST"] = 0
-  //            itemDict1["ModifierParentRowID"] = 1
-  //            itemDict1["IsVoid"] = 0
-  //            itemDict1["OrderNotes"] = ""
-  //            itemsArray.append(itemDict1)
-  //
-  //            // Create and append the second item dictionary
-  //            var itemDict2 = [String: Any]()
-  //            itemDict2["ID"] = 10
-  //            itemDict2["Name"] = "Another Item Name"
-  //            itemDict2["Price"] = 500 // Set the appropriate price
-  //            itemDict2["Qty"] = 2 // Set the appropriate quantity
-  //            itemDict2["Discount"] = 0
-  //            itemDict2["IsUnGroup"] = false
-  //            itemDict2["SectionName"] = "Kitchen"
-  //            itemDict2["ItemWiseGST"] = 0
-  //            itemDict2["ModifierParentRowID"] = 1
-  //            itemDict2["IsVoid"] = 0
-  //            itemDict2["OrderNotes"] = ""
-  //            itemsArray.append(itemDict2)
-  //
-  //            orderDict["Items"] = itemsArray
-  //            ordersArray.append(orderDict)
-  //            jsonStringDict["Orders"] = ordersArray
-  //            parametersDict["JsonString"] = jsonStringDict
-  //            parameters["Parameters"] = parametersDict
-  //            parameters["SpName"] = "uspInsertDataOfflineMode"
-  //
-  //            print(parameters)
-  //
-  //            guard let postData = try? JSONSerialization.data(withJSONObject: parameters) else {
-  //                print("Failed to convert parameters to Data.")
-  //                return
-  //            }
-  //
-  //            let endpoint = APIConstants.Endpoints.dashBoard
-  //            let urlString = APIConstants.baseURL + endpoint
-  //
-  //            guard let apiUrl = URL(string: urlString) else {
-  //                print("Invalid URL.")
-  //                return
-  //            }
-  //
-  //            var request = URLRequest(url: apiUrl)
-  //            // Retrieve the connString and accessToken from UserDefaults
-  //            let connString = UserDefaults.standard.string(forKey: "connectString")
-  //            let accessToken = UserDefaults.standard.string(forKey: "Access_Token") ?? ""
-  //            // Set the headers using the retrieved values
-  //            request.addValue(connString!, forHTTPHeaderField: "x-conn")
-  //            request.addValue("bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-  //            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-  //            request.httpMethod = "POST"
-  //            request.httpBody = postData
-  //
-  //            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-  //                if let error = error {
-  //                    print("Error: \(error)")
-  //                    return
-  //                }
-  //                guard let data = data else {
-  //                    print("No data received.")
-  //                    return
-  //                }
-  //                if let responseString = String(data: data, encoding: .utf8) {
-  //                    print("Response: \(responseString)")
-  //                    DispatchQueue.main.async {
-  //                        self.showAlert(title: "Alert", message: "Send Resquest")
-  //                    }
-  //                }
-  //            }
-  //            task.resume()
-  //        }
-  //    }
-  //}
-
