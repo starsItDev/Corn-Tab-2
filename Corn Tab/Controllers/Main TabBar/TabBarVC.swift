@@ -33,7 +33,7 @@ class TabBarVC: UIViewController {
     var dataSource: [Row] = []
     var timer: Timer?
     var refreshControl: UIRefreshControl!
-
+    var orderIDA: String?
     //MARK: Override Func
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,7 +80,7 @@ class TabBarVC: UIViewController {
         timeLbl.text = dateString
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
-        dateLbl.text = dateFormatter.string(from: currentDate)
+//        dateLbl.text = dateFormatter.string(from: currentDate)
     }
     @objc func eidtBtnTapped(_ sender: UIButton) {
          let jsonData = self.orderDetail[sender.tag].data(using: .utf8)
@@ -153,17 +153,17 @@ class TabBarVC: UIViewController {
              }
              let coverTable = dataSource[sender.tag].coverTable
              let orderNo = dataSource[sender.tag].orderNO
+             let orderIDA = dataSource[sender.tag].orderID
              let dateTime = dataSource[sender.tag].createDateTime?.split(separator: "T")
              let jsonForTable = self.tableDetail[sender.tag].data(using: .utf8)
              do{
                  let tableItems = try JSONDecoder().decode([TableItem].self, from: jsonForTable!)
                  if let firstTableDetail = tableItems.first {
-                     let orderID = firstTableDetail.OrderID
                      let tableID = firstTableDetail.TableID
                      let tableName = firstTableDetail.TableName
-                     
                      let newItem: [String: Any] = [
-                         "OrderNo": orderNo ?? "",
+    
+                        "OrderNo": orderNo ,
                          "TableCover": coverTable ?? "",
                          "TableName" : tableName ?? "",
                          "Date": String(dateTime?[0] ?? ""),
@@ -180,13 +180,16 @@ class TabBarVC: UIViewController {
              print("Error decoding JSON: \(error)")
          }
          
-         
-         
-         let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
+        let orderIDA = dataSource[sender.tag].orderID
+        let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
         if let nextViewController = tabBarController?.viewControllers?[2] as? OrderDetailsVC {
-                nextViewController.updatedButtonText = "Update Order"
-            }
-         tabBarController?.delegate = self
+            nextViewController.updatedButtonText = "Update Order"
+            // Convert Int to String before assignment
+            nextViewController.orderID = String(orderIDA)
+            print(orderIDA)
+            
+        }
+        tabBarController?.delegate = self
          let navigationController = UINavigationController(rootViewController: tabBarController!)
          navigationController.modalPresentationStyle = .fullScreen
          if let viewControllers = tabBarController?.viewControllers, viewControllers.count >= 3 {
@@ -235,7 +238,14 @@ extension TabBarVC {
                     self.dataSource = dashboardModel
                     DispatchQueue.main.async {
                         let date = dashboardModel.first?.createDateTime?.components(separatedBy: "T")
-                        self.dateLbl.text = date?[0] ?? ""
+//                        self.dateLbl.text = date?[0] ?? ""
+                        if let dateString = date?[0] {
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "dd-MM-yyyy"
+                            if let formattedDate = dateFormatter.date(from: dateString) {
+                                self.dateLbl.text = dateFormatter.string(from: formattedDate)
+                            }
+                        }
                         self.pendingOrder.text = "\(pendingOrder)"
                         self.tableIDs = dashboardModel.compactMap { $0.tableID }
                         self.collectionView.reloadData()
@@ -331,7 +341,7 @@ extension TabBarVC: UITableViewDelegate, UITableViewDataSource {
         cell.orderNoLbl.text = rowData.orderNO
         let date = rowData.createDateTime?.components(separatedBy: "T")
         cell.timeLbl.text = (date?[0] ?? "") + " " + (date?[1] ?? "")
-        //cell.timeLbl.text = rowData.createDateTime
+//        cell.timeLbl.text = rowData.createDateTime
         //        cell.tableNoLbl.text = rowData.tableDetail
         let spacing: CGFloat = 20
         cell.separatorInset = UIEdgeInsets(top: 0, left: spacing, bottom: 100, right: spacing)

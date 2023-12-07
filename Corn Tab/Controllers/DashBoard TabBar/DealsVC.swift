@@ -307,6 +307,12 @@ class DealsVC: UIViewController {
         // Move your API response processing logic here
         var sectionNameToID: [String: Int] = [:]
         
+        // Check if parsedRows has enough elements
+        guard self.parsedRows.count > 6 else {
+            // Handle the case where parsedRows doesn't have enough elements
+            return
+        }
+
         let rowItemData = self.parsedRows[6]
         let addOnsItemData = self.parsedRows[7]
         

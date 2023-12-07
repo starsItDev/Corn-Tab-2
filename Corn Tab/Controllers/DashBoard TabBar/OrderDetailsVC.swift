@@ -31,10 +31,12 @@ class OrderDetailsVC: UIViewController {
     var titleLabelTexts: [String] = []
     var updatedButtonText: String?
     var taxAmount: Double?
-        var subtotalPrice: Double?
+    var subtotalPrice: Double?
+    var orderID: String?
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(orderID ?? "")
         tableView.rowHeight = 100
         tableView.reloadData()
         updateDateAndTimeLabels()
@@ -116,13 +118,6 @@ class OrderDetailsVC: UIViewController {
         let formattedTime = dateFormatter.string(from: currentDate)
         timeLbl.text = formattedTime
     }
-//      func updateDateAndTimeLabels() {
-//          let currentDate = Date()
-//          let timeFormatter = DateFormatter()
-//          timeFormatter.dateFormat = "hh:mm a" // Customize the time format as needed
-//          let timeString = timeFormatter.string(from: currentDate)
-//          timeLbl.text = timeString
-//      }
       @objc func eidtBtnTapped(sender: UIButton) {
           guard let tabBarController = self.tabBarController else {
               return
@@ -308,7 +303,13 @@ class OrderDetailsVC: UIViewController {
               var ordersArray = [[String: Any]]()
 
               var orderDict = [String: Any]()
-              orderDict["OrderID"] = "temp#1695381299092"
+//              orderDict["OrderID"] = "temp#1695381299092"
+//              orderDict["OrderID"] = orderID
+                 if ((orderID?.isEmpty) != nil) {
+                     orderDict["OrderID"] = orderID
+                 } else {
+                     orderDict["OrderID"] = "temp#1695381299092"
+                 }
               orderDict["ServiceTypeID"] = 1
               let userid = UserDefaults.standard.integer(forKey: "UserId")
               orderDict["UserID"] = userid
