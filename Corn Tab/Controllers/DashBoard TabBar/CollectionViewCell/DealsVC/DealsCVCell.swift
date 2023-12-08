@@ -14,5 +14,5 @@ class DealsCVCell: UICollectionViewCell {
     @IBOutlet weak var imagePath: UIImageView!
     @IBOutlet weak var qtyLbl: UILabel!
     
-    var dealId: Int?
+    var itemId: Int?
 }
