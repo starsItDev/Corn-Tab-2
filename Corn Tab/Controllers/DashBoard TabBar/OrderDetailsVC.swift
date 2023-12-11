@@ -107,12 +107,16 @@ class OrderDetailsVC: UIViewController {
     private func updateDateAndTimeLabels() {
         let currentDate = Date()
         
-        // Format date
+//        // Format date
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd-MM-yyyy"
-        let formattedDate = dateFormatter.string(from: currentDate)
-        dateLbl.text = formattedDate
-        
+//        dateFormatter.dateFormat = "dd-MM-yyyy"
+//        let formattedDate = dateFormatter.string(from: currentDate)
+//        dateLbl.text = formattedDate
+        // Retrieve workingDate from UserDefaults
+        if let savedWorkingDate = UserDefaults.standard.value(forKey: "savedWorkingDate") as? String {
+            dateLbl.text = savedWorkingDate
+        }
+
         // Format time
         dateFormatter.dateFormat = "h:mm a"
         let formattedTime = dateFormatter.string(from: currentDate)
@@ -453,7 +457,11 @@ extension OrderDetailsVC {
                  if let responseString = String(data: data, encoding: .utf8) {
 //                      print("Response: \(responseString)")
                      DispatchQueue.main.async {
-                         self.showAlert(title: "Alert", message: "Send Resquest")
+//                         self.showAlert(title: "Alert", message: "Send Resquest")
+                         let storyboard = UIStoryboard(name: "Main", bundle: nil) // Replace "Main" with your storyboard name
+                                    if let nextViewController = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as? TabBarVC {
+                                        self.navigationController?.pushViewController(nextViewController, animated: true)
+                                    }
                      }
                  }
              }

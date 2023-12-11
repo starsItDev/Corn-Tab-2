@@ -42,6 +42,8 @@ class TabBarVC: UIViewController {
         attendNameLbl.text = userName
         loactionLbl.text = distributionName
         dateLbl.text =  workingDate
+        print(workingDate)
+        UserDefaults.standard.set(workingDate, forKey: "savedWorkingDate")
         startTimer()
         // Initialize UIRefreshControl
            refreshControl = UIRefreshControl()
@@ -270,43 +272,79 @@ extension TabBarVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! TabBarCVCell
         let rowData = dataSource[indexPath.item]
+
         if let tableDetailData = rowData.tableDetail?.data(using: .utf8),
-           let jsonArray = try? JSONSerialization.jsonObject(with: tableDetailData, options: []) as? [[String: Any]] {
+            let jsonArray = try? JSONSerialization.jsonObject(with: tableDetailData, options: []) as? [[String: Any]] {
             let tableNames = jsonArray.compactMap { $0["TableName"] as? String }
             let concatenatedNames = tableNames.joined(separator: "+")
             cell.tableNoLbl.text = concatenatedNames
         } else {
             cell.tableNoLbl.text = ""
         }
+
         cell.orderNoLbl.text = rowData.orderNO
+
         var date = rowData.createDateTime?.components(separatedBy: "T")
+        
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm:ss.SSS"
-        if let newTime = timeFormatter.date(from: date?[1] ?? ""){
+        
+        if let newTime = timeFormatter.date(from: date?[1] ?? "") {
             timeFormatter.dateFormat = "h:mm a"
-            if let formatedTime = timeFormatter.string(for: newTime) {
-                date?[1] = formatedTime
-                    } else {
-                        print("Failed to format time.")
-                    }
+            if let formattedTime = timeFormatter.string(for: newTime) {
+                date?[1] = formattedTime
+            } else {
+                print("Failed to format time.")
+            }
         }
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
-        if let newDate = dateFormatter.date(from: date?[0] ?? ""){
+        
+        if let newDate = dateFormatter.date(from: date?[0] ?? "") {
             dateFormatter.dateFormat = "dd-MM-yyyy"
-            if let formatedDate = dateFormatter.string(for: newDate) {
-                date?[0] = formatedDate
-                    } else {
-                        print("Failed to format time.")
-                    }
+            if let formattedDate = dateFormatter.string(for: newDate) {
+                date?[0] = formattedDate
+            } else {
+                print("Failed to format date.")
+            }
         }
+
         cell.timeLbl.text = (date?[0] ?? "") + " " + (date?[1] ?? "")
+
+        let displayDateFormatter = DateFormatter()
+        displayDateFormatter.dateFormat = "dd-MM-yyyy h:mm a"
+        
+        if let currentDate = displayDateFormatter.date(from: cell.timeLbl.text ?? "") {
+            // Calculate time ago
+            let timeAgo = calculateTimeAgo(from: currentDate)
+            cell.timeLbl.text = timeAgo
+        }
         //        cell.tableNoLbl.text = rowData.tableDetail
         self.orderDetail.append(rowData.orderDetail ?? "")
         self.tableDetail.append(rowData.tableDetail ?? "")
         cell.eidtBtn.tag = indexPath.item
         cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(_:)), for: .touchUpInside)
         return cell
+    }
+    func calculateTimeAgo(from date: Date) -> String {
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date, to: Date())
+
+        if let year = components.year, year > 0 {
+            return "\(year) year\(year == 1 ? "" : "s") ago"
+        } else if let month = components.month, month > 0 {
+            return "\(month) month\(month == 1 ? "" : "s") ago"
+        } else if let day = components.day, day > 0 {
+            return "\(day) day\(day == 1 ? "" : "s") ago"
+        } else if let hour = components.hour, hour > 0 {
+            return "\(hour) hour\(hour == 1 ? "" : "s") ago"
+        } else if let minute = components.minute, minute > 0 {
+            return "\(minute) minute\(minute == 1 ? "" : "s") ago"
+        } else if let second = components.second, second > 0 {
+            return "\(second) second\(second == 1 ? "" : "s") ago"
+        } else {
+            return "Just now"
+        }
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
             return CGSize(width: 270, height: 200)
@@ -396,10 +434,37 @@ extension TabBarVC:UITabBarControllerDelegate ,UITabBarDelegate {
  
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if tabBarController.selectedIndex == 0 {
-            tabBarController.dismiss(animated: false,completion: {
-                UserDefaults.standard.removeObject(forKey: "addedItems")
-                self.tabBar.selectedItem = self.dashboardTabbar
-            })
+            let addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
+
+            if addedItems.isEmpty {
+                // addedItems is empty, dismiss tabBarController without showing an alert
+                tabBarController.dismiss(animated: false, completion: {
+                    UserDefaults.standard.removeObject(forKey: "addedItems")
+                    self.tabBar.selectedItem = self.dashboardTabbar
+                })
+            } else {
+                // addedItems is not empty, show an alert
+                let alert = UIAlertController(title: "Warning", message: "addedItems is not empty. Do you want to proceed?", preferredStyle: .alert)
+                
+                let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+                    // Dismiss tabBarController and perform other actions
+                    tabBarController.dismiss(animated: false, completion: {
+                        UserDefaults.standard.removeObject(forKey: "addedItems")
+                        self.tabBar.selectedItem = self.dashboardTabbar
+                    })
+                }
+                
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    // Handle cancel button tap (you can leave it empty or perform additional actions)
+                    print("")
+                }
+                
+                alert.addAction(okAction)
+                alert.addAction(cancelAction)
+                
+                // Present the alert
+                tabBarController.present(alert, animated: true, completion: nil)
+            }
         }
     }
 }
