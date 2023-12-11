@@ -36,7 +36,7 @@ class DealsVC: UIViewController {
     var itemIDToSectionID: [Int: Int] = [:]
     var sectionNameToID: [String: Int] = [:]
     var selectedAddOnIndexPaths: Set<IndexPath> = []
-    var selectedAddOnToItemId: [Int: [String]] = [:]
+    var selectedAddOnToItemId: [String] = []
     var receivedLabelText: String?
     var receivedSegmentTitle: String?
     var receivedItemCount: String? = nil
@@ -258,7 +258,8 @@ class DealsVC: UIViewController {
                     selectedAddOnPrices.append(addOnPrice)
                     selectedAddOnsForAPI.append(addOnInfo)
                     selectedAddOnsId.append("\(addOnId)")
-                    selectedAddOnToItemId[selectedItemId ?? 0]?.append(addOnName)
+                    let addOnToId = "\(addOnName) \(selectedItemId ?? 0)"
+                    selectedAddOnToItemId.append(addOnToId)
                 }
             }
             
@@ -290,9 +291,9 @@ class DealsVC: UIViewController {
             let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
             let selectedItemIdsString = itemIdArr.joined(separator: "\n")
             let selectedItemNamesString = itemNameArr.joined(separator: "\n")
-            let selectedAddOnsForAPIStr = selectedAddOnsForAPI.joined(separator: "\n")
+            let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
             let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
-            let selectedAddOnToItemIdStr = selectedAddOnToItemId[selectedItemId ?? 0]?.joined(separator: "\n")
+            let selectedAddOnToItemIdStr = selectedAddOnToItemId.joined(separator: "\n")
             
             let newItem: [String: String] = [
                 "isDeals": "true",
@@ -305,7 +306,8 @@ class DealsVC: UIViewController {
                 "ItemId": selectedItemIdsString,
                 "ItemName": selectedItemNamesString,
                 "AddOnId": selectedAddOnsIdsStr,
-                "SelectedAddOnsForAPI": "\(selectedAddOnToItemIdStr ?? "")",
+                "SelectedAddOnsForAPI": selectedAddOnToItemIdStr,
+                "SelectedAddOnsForPrice": selectedAddOnsForPrice,
                 "SelectedAddOns": selectedAddOnsString,
                 "isAddOn": "true"
             ]
@@ -314,11 +316,10 @@ class DealsVC: UIViewController {
                 savedItems[existingSegment]["Price"] = "\(totalPrice)"
                 savedItems[existingSegment]["ItemId"] = selectedItemIdsString
                 savedItems[existingSegment]["ItemName"] = selectedItemNamesString
-                savedItems[existingSegment]["ItemId"] = selectedItemIdsString
-                            savedItems[existingSegment]["ItemName"] = selectedItemNamesString
-                            savedItems[existingSegment]["isAddOn"] = "true"
-                            savedItems[existingSegment]["SelectedAddOnsForAPI"] = "\(selectedAddOnToItemIdStr)"
-                            savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
+                savedItems[existingSegment]["isAddOn"] = "true"
+                savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnToItemIdStr
+                savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
+                savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
             }
             else {
                 savedItems.append(newItem)
@@ -553,32 +554,6 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             updateItemSelectedLabel()
             if collectionView == itemcollectionView {
                 let selectedSegmentIndex = segments.selectedSegmentIndex
-                for (index, sectionName) in self.sectionNamesQTY.enumerated() {
-                    if let intValue = sectionName.extractIntFromParentheses(), index == selectedSegmentIndex {
-                        print("intValue: \(intValue)")
-                        let countToSelect = min(intValue, collectionView.numberOfItems(inSection: 0))
-                        print("countToSelect: \(countToSelect)")
-
-                        // Select the required items
-                        var selectedIndexPaths: [IndexPath] = []
-                        for i in 0..<countToSelect {
-                            let itemIndexPath = IndexPath(item: i, section: 0)
-                            print("Selecting item at indexPath: \(itemIndexPath)")
-                            selectedIndexPaths.append(itemIndexPath)
-                        }
-
-                        // Deselect all items first
-                        collectionView.indexPathsForSelectedItems?.forEach {
-                            collectionView.deselectItem(at: $0, animated: false)
-                        }
-
-                        // Select the accumulated items
-                        for indexPath in selectedIndexPaths {
-                            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredHorizontally)
-                        }
-
-                    }
-                }
                 if selectedIndexPathsForSegments[selectedSegmentIndex] == nil {
                     selectedIndexPathsForSegments[selectedSegmentIndex] = []
                 }
@@ -662,9 +637,11 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                         }
                         if let existingSegment = savedItems.firstIndex(where: {$0["isAddOn"] == "true"}){
                             let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
-                            let selectedAddOnsForAPIStr = selectedAddOnsForAPI.joined(separator: "\n")
+                            let selectedAddOnsForAPIStr = selectedAddOnToItemId.joined(separator: "\n")
+                            let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
                             savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
                             savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnsForAPIStr
+                            savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
                         }
                         if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
                             savedItems[existingSegment]["SelectedAddOns"] = "\(selectedAddOnsString)"
@@ -697,7 +674,7 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                 }
                 if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
                     if let count = cellSelectionCounts[indexPath] {
-//                        cell.qtyLbl.text = "Qty: \(count)"
+                        cell.qtyLbl.text = "Qty: \(count)"
                     }
                 }
                 updateItemSelectedLabel()

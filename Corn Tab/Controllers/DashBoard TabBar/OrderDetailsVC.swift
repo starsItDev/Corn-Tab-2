@@ -291,183 +291,208 @@ class OrderDetailsVC: UIViewController {
             }
   }
 extension OrderDetailsVC {
-     func makePOSTRequest() {
-         let selectedTableID = UserDefaults.standard.string(forKey: "SelectedTableIDs")
-//              let coverTableText = Int(tableCoverNoLbl.text!),
+    func makePOSTRequest() {
+            let selectedTableID = UserDefaults.standard.string(forKey: "SelectedTableIDs")
+            //              let coverTableText = Int(tableCoverNoLbl.text!),
             let titleText = titleLabelText
-             let titlePrice = Double(titlePrice!)
-             let quantityCount = Int(quantity!)
-             
-         
-         
-             var addOnArr = [[String:Any]]()
-             var addOnDict = [String: Any]()
-             var parameters = [String: Any]()
-             var parametersDict = [String: Any]()
-             parametersDict["DistributorID"] = "1"
-             var jsonStringDict = [String: Any]()
-             var ordersArray = [[String: Any]]()
-
-             var orderDict = [String: Any]()
-//              orderDict["OrderID"] = "temp#1695381299092"
-//              orderDict["OrderID"] = orderID
-                if ((orderID?.isEmpty) != nil) {
-                    orderDict["OrderID"] = orderID
-                } else {
-                    orderDict["OrderID"] = "temp#1695381299092"
-                }
-             orderDict["ServiceTypeID"] = 1
-             let userid = UserDefaults.standard.integer(forKey: "UserId")
-             orderDict["UserID"] = userid
-             orderDict["TableID"] = selectedTableID
-             orderDict["GrossAmount"] = self.subtotalPrice
-             orderDict["GSTAmount"] = self.taxAmount
-             orderDict["GSTPer"] = 16
-             orderDict["ItemWiseDiscount"] = 0
-             orderDict["IsHold"] = 1
-             orderDict["CoverTable"] = coverTableText
-             var itemsArray = [[String: Any]]()
-             var itemDict = [String: Any]()
-         var dealItemDict = [String: Any]()
-         var dealAddOnDict = [String: Any]()
-             let addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-             var modifierParentRowID = 1
-             for item in addedItems {
-                 
-                 if let isDeals = item["isDeals"]{
-                     if isDeals == "true"{
-                         itemDict["ID"] = item["DealID"]
-                         itemDict["DealName"] = item["DealName"]
-                         itemDict["DealQty"] = item["Qty"]
-                         itemDict["ModifierParentRowID"] = modifierParentRowID
-                         itemDict["ProductCategoryID"] = NSNull()
-                         itemDict["SaleMUnitCode"] = NSNull()
-                         itemDict["IsFree"] = NSNull()
-                         itemDict["OriginalQty"] = NSNull()
-                         itemDict["IsModifiedItem"] = NSNull()
-                         itemDict["KDSQty"] = NSNull()
-                         let itemIds = item["ItemId"]?.components(separatedBy: "\n")
-                         let itemNames = item["ItemName"]?.components(separatedBy: "\n")
-                         
-                         if itemIds?.count == itemNames?.count{
-                             for i in 0...(itemIds?.count ?? 0) - 1{
-                                 dealItemDict["ID"] = itemIds?[i]
-                                 dealItemDict["Name"] = itemNames?[i]
-                                 dealItemDict["ModifierParentRowID"] = modifierParentRowID
-                                 dealItemDict["ItemWiseGST"] = 0
-                                 dealItemDict["ProductCategoryID"] = NSNull()
-                                 dealItemDict["SaleMUnitCode"] = NSNull()
-                                 dealItemDict["IsFree"] = NSNull()
-                                 dealItemDict["OriginalQty"] = NSNull()
-                                 dealItemDict["GSTPer"] = NSNull()
-                                 dealItemDict["VoidBy"] = NSNull()
-                                 dealItemDict["IsModifiedItem"] = NSNull()
-                                 if let isAddOns = item["isAddOn"]{
-                                     let addonId = item["AddOnId"]?.components(separatedBy: "\n")
-                                     let addonName = item["SelectedAddOnsForAPI"]?.components(separatedBy: "\n")
-                                     if isAddOns == "true"{
-                                         if addonId?.count == addonName?.count{
-                                             for j in 0...(addonId?.count ?? 0) - 1{
-                                                 dealAddOnDict["ID"] = addonId?[j]
-                                                 dealAddOnDict["Name"] = addonName?[j].components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-                                             }
-                                         }
-                                     }
-                                 }
-                             }
-                         }
-                         itemDict["Items"] = dealItemDict
-                         
-                     }
-                 }
-                 else{
-                     itemDict["ID"] = Int(item["ID"] ?? "")
-                     itemDict["Name"] = item["Title"]
-                     itemDict["Price"] = Double(item["BasePrice"] ?? "")
-                     itemDict["Qty"] = quantityCount
-                     itemDict["Discount"] = 0
-                     itemDict["IsUnGroup"] = false
-                     itemDict["SectionName"] = "Kitchen"
-                     itemDict["ItemWiseGST"] = 0
-                     itemDict["ModifierParentRowID"] = modifierParentRowID
-                     itemDict["IsVoid"] = 0
-                     itemDict["OrderNotes"] = ""
-                     if item["isAddOn"] == "true"{
-                         let addOnID = item["SelectedAddOnsId"]?.components(separatedBy: "\n")
-                         let addOnName = item["SelectedAddOns"]?.components(separatedBy: "\n")
-                         addOnArr.removeAll()
-                         if addOnID?.count == addOnName?.count{
-                             for i in 0...(addOnID?.count ?? 0) - 1{
-                                 addOnDict["ID"] = Int(addOnID?[i] ?? "")
-                                 addOnDict["Name"] = addOnName?[i]
-                                 addOnDict["Qty"] = 1
-                                 addOnDict["ItemWiseGST"] = 0
-                                 addOnDict["ModifierParentRowID"] = modifierParentRowID
-                                 let addonPrice = (Double(addOnName?[i].components(separatedBy: CharacterSet.decimalDigits.inverted).joined() ?? "") ?? 0) / 10
-                                 addOnDict["Price"] = addonPrice
-                                 addOnArr.append(addOnDict)
-                             }
-                         }
-                         itemDict["AddOns"] = addOnArr
-                     }
-                 }
-                 
-                 modifierParentRowID += 1
-                 itemsArray.append(itemDict)
-             }
-             
-             orderDict["Items"] = itemsArray
-             ordersArray.append(orderDict)
-             jsonStringDict["Orders"] = orderDict
-             parametersDict["JsonString"] = jsonStringDict
-             parameters["Parameters"] = parametersDict
-             parameters["SpName"] = "uspInsertDataOfflineMode"
-              print(parameters)
-             guard let postData = try? JSONSerialization.data(withJSONObject: parameters) else {
-                 print("Failed to convert parameters to Data.")
-                 return
-             }
-
-             let endpoint = APIConstants.Endpoints.dashBoard
-             let urlString = APIConstants.baseURL + endpoint
-             guard let apiUrl = URL(string: urlString) else {
-                 print("Invalid URL.")
-                 return
-             }
-             var request = URLRequest(url: apiUrl)
-             // Retrieve the connString and accessToken from UserDefaults
-             let connString = UserDefaults.standard.string(forKey: "connectString")
-             let accessToken = UserDefaults.standard.string(forKey: "Access_Token") ?? ""
-             // Set the headers using the retrieved values
-             request.addValue(connString!, forHTTPHeaderField: "x-conn")
-             request.addValue("bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-             request.httpMethod = "POST"
-             request.httpBody = postData
-
-             let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                 if let error = error {
-                     print("Error: \(error)")
-                     return
-                 }
-                 guard let data = data else {
-                     print("No data received.")
-                     return
-                 }
-                 if let responseString = String(data: data, encoding: .utf8) {
-//                      print("Response: \(responseString)")
-                     DispatchQueue.main.async {
-//                         self.showAlert(title: "Alert", message: "Send Resquest")
-                         let storyboard = UIStoryboard(name: "Main", bundle: nil) // Replace "Main" with your storyboard name
-                                    if let nextViewController = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as? TabBarVC {
-                                        self.navigationController?.pushViewController(nextViewController, animated: true)
+            let titlePrice = Double(titlePrice!)
+            let quantityCount = Int(quantity!)
+            
+            
+            
+            var addOnArr = [[String:Any]]()
+            var addOnDict = [String: Any]()
+            var parameters = [String: Any]()
+            var parametersDict = [String: Any]()
+            parametersDict["DistributorID"] = "1"
+            var jsonStringDict = [String: Any]()
+            var ordersArray = [[String: Any]]()
+            
+            var orderDict = [String: Any]()
+            //              orderDict["OrderID"] = "temp#1695381299092"
+            //              orderDict["OrderID"] = orderID
+            if ((orderID?.isEmpty) != nil) {
+                orderDict["OrderID"] = orderID
+            } else {
+                orderDict["OrderID"] = "temp#1695381299092"
+            }
+            orderDict["ServiceTypeID"] = 1
+            let userid = UserDefaults.standard.integer(forKey: "UserId")
+            orderDict["UserID"] = userid
+            orderDict["TableID"] = selectedTableID
+            orderDict["GrossAmount"] = self.subtotalPrice
+            orderDict["GSTAmount"] = self.taxAmount
+            orderDict["GSTPer"] = 16
+            orderDict["ItemWiseDiscount"] = 0
+            orderDict["IsHold"] = 1
+            orderDict["CoverTable"] = coverTableText
+            var itemsArray = [[String: Any]]()
+            var itemDict = [String: Any]()
+            
+            var dealItemDict = [String: Any]()
+            var dealItemArr = [[String: Any]]()
+            var dealAddOnDict = [String: Any]()
+            var dealAddOnArr = [[String:Any]]()
+            let addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
+            var modifierParentRowID = 1
+            for item in addedItems {
+                
+                if let isDeals = item["isDeals"]{
+                    if isDeals == "true"{
+                        itemDict.removeAll()
+                        itemDict["DealID"] = Int(item["DealID"] ?? "")
+                        itemDict["DealName"] = item["DealName"]
+                        itemDict["DealQty"] = item["Qty"]
+                        itemDict["ModifierParentRowID"] = modifierParentRowID
+    //                    itemDict["ProductCategoryID"] = NSNull()
+    //                    itemDict["SaleMUnitCode"] = NSNull()
+    //                    itemDict["IsFree"] = NSNull()
+    //                    itemDict["OriginalQty"] = NSNull()
+    //                    itemDict["IsModifiedItem"] = NSNull()
+    //                    itemDict["KDSQty"] = NSNull()
+                        let itemIds = item["ItemId"]?.components(separatedBy: "\n")
+                        let itemNames = item["ItemName"]?.components(separatedBy: "\n")
+                        
+                        if itemIds?.count == itemNames?.count{
+                            for i in 0...(itemIds?.count ?? 0) - 1{
+                                dealItemDict["ID"] = Int(itemIds?[i] ?? "")
+                                dealItemDict["Name"] = itemNames?[i]
+                                dealItemDict["ModifierParentRowID"] = modifierParentRowID
+                                dealItemDict["ItemWiseGST"] = 0
+    //                            dealItemDict["ProductCategoryID"] = NSNull()
+    //                            dealItemDict["SaleMUnitCode"] = NSNull()
+    //                            dealItemDict["IsFree"] = NSNull()
+    //                            dealItemDict["OriginalQty"] = NSNull()
+    //                            dealItemDict["GSTPer"] = NSNull()
+    //                            dealItemDict["VoidBy"] = NSNull()
+    //                            dealItemDict["IsModifiedItem"] = NSNull()
+                                if let isAddOns = item["isAddOn"]{
+                                    if isAddOns == "true"{
+                                        let addonId = item["AddOnId"]?.components(separatedBy: "\n")
+                                        let addonName = item["SelectedAddOnsForAPI"]?.components(separatedBy: "\n")
+                                        let addonNameWithPrice = item["SelectedAddOnsForPrice"]?.components(separatedBy: "\n")
+                                        if addonId?.count == addonName?.count{
+                                            for j in 0...(addonId?.count ?? 0) - 1{
+                                                let itemId = "\(separateAlphabetsAndNumbers(from: addonName?[j]).numbers)"
+                                                if itemId == itemIds?[i]{
+                                                    dealAddOnDict["ID"] = Int(addonId?[j] ?? "")
+                                                    dealAddOnDict["Name"] = separateAlphabetsAndNumbers(from: addonName?[j]).alphabets
+                                                    let addonPrice = (Double(addonNameWithPrice?[j].components(separatedBy: CharacterSet.decimalDigits.inverted).joined() ?? "") ?? 0) / 10
+                                                    addOnDict["Price"] = addonPrice
+                                                    dealAddOnDict["ModifierParentRowID"] = modifierParentRowID
+    //                                                dealAddOnDict["ProductCategoryID"] = NSNull()
+    //                                                dealAddOnDict["SaleMUnitCode"] = NSNull()
+    //                                                dealAddOnDict["IsFree"] = NSNull()
+    //                                                dealAddOnDict["OriginalQty"] = NSNull()
+    //                                                dealAddOnDict["GSTPer"] = NSNull()
+    //                                                dealAddOnDict["VoidBy"] = NSNull()
+    //                                                dealAddOnDict["IsModifiedItem"] = NSNull()
+    //                                                dealAddOnDict["KDSQty"] = NSNull()
+                                                    dealAddOnArr.append(dealAddOnDict)
+                                                }
+                                            }
+                                            dealItemDict["AddOns"] = dealAddOnArr
+                                        }
+                                        dealAddOnArr.removeAll()
                                     }
-                     }
-                 }
-             }
-             task.resume()
-         }
-     
+                                }
+                                
+                                dealItemArr.append(dealItemDict)
+                                
+                            }
+                        }
+                        itemDict["Items"] = dealItemArr
+                    }
+                    dealItemArr.removeAll()
+                }
+                else{
+                    itemDict.removeAll()
+                    itemDict["ID"] = Int(item["ID"] ?? "")
+                    itemDict["Name"] = item["Title"]
+                    itemDict["Price"] = Double(item["BasePrice"] ?? "")
+                    itemDict["Qty"] = quantityCount
+                    itemDict["Discount"] = 0
+                    itemDict["IsUnGroup"] = false
+                    itemDict["SectionName"] = "Kitchen"
+                    itemDict["ItemWiseGST"] = 0
+                    itemDict["ModifierParentRowID"] = modifierParentRowID
+                    itemDict["IsVoid"] = 0
+                    itemDict["OrderNotes"] = ""
+                    if item["isAddOn"] == "true"{
+                        let addOnID = item["SelectedAddOnsId"]?.components(separatedBy: "\n")
+                        let addOnName = item["SelectedAddOns"]?.components(separatedBy: "\n")
+                        addOnArr.removeAll()
+                        if addOnID?.count == addOnName?.count{
+                            for i in 0...(addOnID?.count ?? 0) - 1{
+                                addOnDict["ID"] = Int(addOnID?[i] ?? "")
+                                addOnDict["Name"] = addOnName?[i]
+                                addOnDict["Qty"] = 1
+                                addOnDict["ItemWiseGST"] = 0
+                                addOnDict["ModifierParentRowID"] = modifierParentRowID
+                                let addonPrice = (Double(addOnName?[i].components(separatedBy: CharacterSet.decimalDigits.inverted).joined() ?? "") ?? 0) / 10
+                                addOnDict["Price"] = addonPrice
+                                addOnArr.append(addOnDict)
+                            }
+                        }
+                        itemDict["AddOns"] = addOnArr
+                    }
+                }
+                
+                modifierParentRowID += 1
+                itemsArray.append(itemDict)
+            }
+            
+            orderDict["Items"] = itemsArray
+            ordersArray.append(orderDict)
+            jsonStringDict["Orders"] = ordersArray
+            parametersDict["JsonString"] = jsonStringDict
+            parameters["SpName"] = "uspInsertDataOfflineMode"
+            parameters["Parameters"] = parametersDict
+            print(parameters)
+            guard let postData = try? JSONSerialization.data(withJSONObject: parameters) else {
+                print("Failed to convert parameters to Data.")
+                return
+            }
+            
+            let endpoint = APIConstants.Endpoints.dashBoard
+            let urlString = APIConstants.baseURL + endpoint
+            guard let apiUrl = URL(string: urlString) else {
+                print("Invalid URL.")
+                return
+            }
+            var request = URLRequest(url: apiUrl)
+            // Retrieve the connString and accessToken from UserDefaults
+            let connString = UserDefaults.standard.string(forKey: "connectString")
+            let accessToken = UserDefaults.standard.string(forKey: "Access_Token") ?? ""
+            // Set the headers using the retrieved values
+            request.addValue(connString!, forHTTPHeaderField: "x-conn")
+            request.addValue("bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpMethod = "POST"
+            request.httpBody = postData
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error: \(error)")
+                    return
+                }
+                guard let data = data else {
+                    print("No data received.")
+                    return
+                }
+                if let responseString = String(data: data, encoding: .utf8) {
+                    //                      print("Response: \(responseString)")
+                    DispatchQueue.main.async {
+                        //                         self.showAlert(title: "Alert", message: "Send Resquest")
+                        let storyboard = UIStoryboard(name: "Main", bundle: nil) // Replace "Main" with your storyboard name
+                        if let nextViewController = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as? TabBarVC {
+                            self.navigationController?.pushViewController(nextViewController, animated: true)
+                        }
+                    }
+                }
+            }
+            task.resume()
+        }
      func separateAlphabetsAndNumbers(from addonName: String?) -> (alphabets: String, numbers: String) {
          guard let addonName = addonName else {
              return ("", "")
@@ -488,3 +513,4 @@ extension OrderDetailsVC {
      }
  }
   
+
