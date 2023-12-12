@@ -12,5 +12,14 @@ class DashboardVC: UIViewController {
         super.viewDidLoad()
         
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        DispatchQueue.main.async {
+            if let tabBarController = self.tabBarController {
+                // Set the index of the tab you want to select
+                tabBarController.selectedIndex = 2
+            }
+        }
+    }
 }
 

@@ -444,7 +444,7 @@ extension TabBarVC:UITabBarControllerDelegate ,UITabBarDelegate {
                 })
             } else {
                 // addedItems is not empty, show an alert
-                let alert = UIAlertController(title: "Warning", message: "addedItems is not empty. Do you want to proceed?", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Alert", message: "Do you want to discard your Order?", preferredStyle: .alert)
                 
                 let okAction = UIAlertAction(title: "OK", style: .default) { _ in
                     // Dismiss tabBarController and perform other actions

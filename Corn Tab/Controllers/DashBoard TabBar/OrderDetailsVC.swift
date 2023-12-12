@@ -344,12 +344,8 @@ extension OrderDetailsVC {
                         itemDict["DealName"] = item["DealName"]
                         itemDict["DealQty"] = item["Qty"]
                         itemDict["ModifierParentRowID"] = modifierParentRowID
-    //                    itemDict["ProductCategoryID"] = NSNull()
-    //                    itemDict["SaleMUnitCode"] = NSNull()
-    //                    itemDict["IsFree"] = NSNull()
-    //                    itemDict["OriginalQty"] = NSNull()
-    //                    itemDict["IsModifiedItem"] = NSNull()
-    //                    itemDict["KDSQty"] = NSNull()
+                        itemDict["IsUnGroup"] = true
+                        
                         let itemIds = item["ItemId"]?.components(separatedBy: "\n")
                         let itemNames = item["ItemName"]?.components(separatedBy: "\n")
                         
@@ -359,13 +355,10 @@ extension OrderDetailsVC {
                                 dealItemDict["Name"] = itemNames?[i]
                                 dealItemDict["ModifierParentRowID"] = modifierParentRowID
                                 dealItemDict["ItemWiseGST"] = 0
-    //                            dealItemDict["ProductCategoryID"] = NSNull()
-    //                            dealItemDict["SaleMUnitCode"] = NSNull()
-    //                            dealItemDict["IsFree"] = NSNull()
-    //                            dealItemDict["OriginalQty"] = NSNull()
-    //                            dealItemDict["GSTPer"] = NSNull()
-    //                            dealItemDict["VoidBy"] = NSNull()
-    //                            dealItemDict["IsModifiedItem"] = NSNull()
+                                dealItemDict["OrderNotes"] = ""
+                                dealItemDict["IsVoid"] = 0
+                                dealItemDict["sectionIndex"] = 0
+                                dealItemDict["IsUnGroup"] = false
                                 if let isAddOns = item["isAddOn"]{
                                     if isAddOns == "true"{
                                         let addonId = item["AddOnId"]?.components(separatedBy: "\n")
@@ -378,16 +371,8 @@ extension OrderDetailsVC {
                                                     dealAddOnDict["ID"] = Int(addonId?[j] ?? "")
                                                     dealAddOnDict["Name"] = separateAlphabetsAndNumbers(from: addonName?[j]).alphabets
                                                     let addonPrice = (Double(addonNameWithPrice?[j].components(separatedBy: CharacterSet.decimalDigits.inverted).joined() ?? "") ?? 0) / 10
-                                                    addOnDict["Price"] = addonPrice
+                                                    dealAddOnDict["Price"] = addonPrice
                                                     dealAddOnDict["ModifierParentRowID"] = modifierParentRowID
-    //                                                dealAddOnDict["ProductCategoryID"] = NSNull()
-    //                                                dealAddOnDict["SaleMUnitCode"] = NSNull()
-    //                                                dealAddOnDict["IsFree"] = NSNull()
-    //                                                dealAddOnDict["OriginalQty"] = NSNull()
-    //                                                dealAddOnDict["GSTPer"] = NSNull()
-    //                                                dealAddOnDict["VoidBy"] = NSNull()
-    //                                                dealAddOnDict["IsModifiedItem"] = NSNull()
-    //                                                dealAddOnDict["KDSQty"] = NSNull()
                                                     dealAddOnArr.append(dealAddOnDict)
                                                 }
                                             }
@@ -513,4 +498,5 @@ extension OrderDetailsVC {
      }
  }
   
+
 
