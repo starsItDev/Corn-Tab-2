@@ -674,7 +674,7 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                 }
                 if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
                     if let count = cellSelectionCounts[indexPath] {
-                        cell.qtyLbl.text = "Qty: \(count)"
+//                        cell.qtyLbl.text = "Qty: \(count)"
                     }
                 }
                 updateItemSelectedLabel()

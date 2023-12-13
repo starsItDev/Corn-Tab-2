@@ -162,7 +162,6 @@ class DineInVC: UIViewController{
             itemcollectionView.reloadItems(at: indexPaths)
         }
         if let cellCounts = cellSelectionCountsForSegments[selectedSegmentIndex] {
-                // If there were previously selected cells for this segment, store them in cellSelectionCounts.
                 cellSelectionCounts = cellCounts
             }
         scrollView.setContentOffset(CGPoint(x: xOffset, y: 0), animated: true)
@@ -177,7 +176,6 @@ class DineInVC: UIViewController{
         for indexPath in selectedIndexPaths {
             if let cell = itemcollectionView.cellForItem(at: indexPath) as? DineInCVCell {
                 cell.cellView.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
-                // Clear qtyLbl
                 cell.qtyLbl.text = nil
             }
         }
@@ -247,18 +245,9 @@ class DineInVC: UIViewController{
                 selectedAddOnPrices.append(addOnPrice)
                 selectedAddOnIds.append("\(addOnId)")
                 itemID = "\(itemId)"
-                //selectedAddOnIds.updateValue(addOnName, forKey: "\(addOnId)")
-//                let newAddOn: [String: Any] = [
-//                    "addOnName":  addOnName ,
-//                    "addOnPrice": addOnPriceText ,
-//                    "addOnId": addOnId,
-//                    "itemId": itemId ,
-//                ]
-//                selectedAddOnInfo.append(newAddOn)
             }
         }
         UserDefaults.standard.set(selectedAddOnInfo, forKey: "selectedAddOnInfo")
-//        print(type(of: selectedAddOnInfo))
         let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
         let totalPrice = basePrice + totalAddOnPrice
         let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
@@ -279,7 +268,6 @@ class DineInVC: UIViewController{
             "SelectedAddOns": selectedAddOnsString,
             "SelectedAddOnsId":selectedAddOnIdString,
             "ID": itemID,
-//            "SelectedAddOnPrice":
             "isAddOn": "true"
         ]
         var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
@@ -365,14 +353,6 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                 if let price = item.price {
                     cell.priceLabel?.text = "\(price)"
                 }
-//                if let imagePath = item.imagePath, !imagePath.isEmpty {
-//                    // If item.imagePath is not nil and not empty, set the image with the provided path
-//                    cell.imagePath?.setImage(with: imagePath)
-//                } else {
-//                    // If item.imagePath is nil or empty, set a default or "Demi" image
-//                    cell.imagePath?.image = #imageLiteral(resourceName: "icons8-food-64")
-//                }
-
                 cell.imagePath?.setImage(with: item.imagePath!)
                 // Check if there are any matching add-ons
                 let matchingAddOns = apiResponseAddOns.filter { addOnItem in
@@ -471,9 +451,9 @@ extension DineInVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLay
                     ]
                     
                     var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-                    if let existingItemIndex = savedItems.firstIndex(where: { $0["itemName"] == selectedItemName }) {
-                        if let existingItemINCV = Int(savedItems[existingItemIndex]["itemINCV"] ?? "0") {
-                            savedItems[existingItemIndex]["itemINCV"] = String(existingItemINCV + 1)
+                    if let existingItemIndex = savedItems.firstIndex(where: { $0["Title"] == selectedItemName }) {
+                        if let existingItemINCV = Int(savedItems[existingItemIndex]["Qty"] ?? "0") {
+                            savedItems[existingItemIndex]["Qty"] = String(existingItemINCV + 1)
                         }
                     } else {
                         savedItems.append(newItem)
