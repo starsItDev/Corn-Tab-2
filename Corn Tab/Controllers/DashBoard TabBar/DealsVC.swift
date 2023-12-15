@@ -52,12 +52,12 @@ class DealsVC: UIViewController {
     var parsedRows: [[MasterDetailRow]] = []
     
     var itemNameArr: [String] = []
-        var itemIdArr: [String] = []
-        var selectedAddOns: [String] = []
-        var selectedAddOnsForAPI: [String] = []
-        var selectedAddOnsId: [String] = []
-        var dealItemName: [Int:String] = [:]
-        var dealAddOnName: [Int: String] = [:]
+    var itemIdArr: [String] = []
+    var selectedAddOns: [String] = []
+    var selectedAddOnsForAPI: [String] = []
+    var selectedAddOnsId: [String] = []
+    var dealItemName: [Int:String] = [:]
+    var dealAddOnName: [Int: String] = [:]
     var selectedAddOnPrices: [Double] = []
     var isDeal = false
     
@@ -156,27 +156,28 @@ class DealsVC: UIViewController {
                     }
                 }
             }
-            // UI updates can be performed here
-            //DispatchQueue.main.async {
             self.segments.removeAllSegments()
             self.sectionNameToID = sectionNameToID
             for (index, sectionName) in self.sectionNamesQTY.enumerated() {
                 self.segments.insertSegment(withTitle: sectionName, at: index, animated: false)
             }
             self.segments.selectedSegmentIndex = 0
-            
-            // }
             self.itemcollectionView.reloadData()
             self.addOnscollectionView.reloadData()
             clearSelectedCells()
             selectedIndexPaths.removeAll()
             cellSelectionCounts.removeAll()
+          
+
+            // Assuming selectedSegmentIndex is an integer
             if let indexPaths = selectedIndexPathsForSegments[selectedSegmentIndex] {
                 selectedIndexPaths.append(contentsOf: indexPaths)
                 itemcollectionView.reloadItems(at: indexPaths)
+            } else {
+                // Handle the case where selectedSegmentIndex is out of bounds or the array is nil
+                print("Invalid selectedSegmentIndex or nil array")
             }
             if let cellCounts = cellSelectionCountsForSegments[selectedSegmentIndex] {
-                // If there were previously selected cells for this segment, store them in cellSelectionCounts.
                 cellSelectionCounts = cellCounts
             }
             itemCount = 1
@@ -190,12 +191,12 @@ class DealsVC: UIViewController {
     @IBAction func segmentController(_ sender: UISegmentedControl) {
         let selectedSegmentIndex = sender.selectedSegmentIndex
         if selectedSegmentIndex >= 0 {
-                if let selectedSegmentText = sender.titleForSegment(at: selectedSegmentIndex) {
-                    if let intValueINdex1 = selectedSegmentText.extractIntFromParentheses() {
-                        print("Selected Segment Integer Value: \(intValueINdex1)")
-                    }
+            if let selectedSegmentText = sender.titleForSegment(at: selectedSegmentIndex) {
+                if let intValueINdex1 = selectedSegmentText.extractIntFromParentheses() {
+                    print("Selected Segment Integer Value: \(intValueINdex1)")
                 }
             }
+        }
         clearSelectedCells()
         selectedIndexPaths.removeAll()
         cellSelectionCounts.removeAll()
@@ -205,7 +206,6 @@ class DealsVC: UIViewController {
             itemcollectionView.reloadItems(at: indexPaths)
         }
         if let cellCounts = cellSelectionCountsForSegments[selectedSegmentIndex] {
-            // If there were previously selected cells for this segment, store them in cellSelectionCounts.
             cellSelectionCounts = cellCounts
         }
         itemCount = 0
@@ -228,107 +228,100 @@ class DealsVC: UIViewController {
         hideSubView()
         clearSelectedAddOnIndexPaths()
         addOnscollectionView.reloadData()
-        // Decrement the selectedItemCount by 1
         if selectedIndexPaths.count > 0 {
             selectedIndexPaths.removeLast()
             updateItemSelectedLabel() // Update the label
         }
     }
     @IBAction func addToOrder(_ sender: UIButton) {
-            guard itemCount > 0 else {
-                showAlert(title: "Error", message: "Please select items to add to the order.")
-                return
-            }
-            hideSubView()
-            let title = titleLbl.text ?? ""
-            let quantity = quntityLbl.text ?? ""
-            let basePriceText = subViewPriceLbl.text ?? "0.0"
-            let basePrice = Double(basePriceText) ?? 0.0
-            //var selectedAddOns: [String] = []
-            //            var selectedAddOnPrices: [Double] = []
-            
-            for indexPath in selectedAddOnIndexPaths {
-                if let cell = addOnscollectionView.cellForItem(at: indexPath) as? AddOnDealCVCell,
-                   let addOnName = cell.nameLabel.text,
-                   let addOnPriceText = cell.priceLabel.text,
-                   let addOnId = cell.addonId,
-                   let addOnPrice = Double(addOnPriceText.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
-                    let addOnInfo = "\(addOnName) (\(addOnPrice))"
-                    selectedAddOns.append(addOnInfo)
-                    selectedAddOnPrices.append(addOnPrice)
-                    selectedAddOnsForAPI.append(addOnInfo)
-                    selectedAddOnsId.append("\(addOnId)")
-                    let addOnToId = "\(addOnName) \(selectedItemId ?? 0)"
-                    selectedAddOnToItemId.append(addOnToId)
-                }
-            }
-            
-            let segmentName = segmentsFirstDeals.titleForSegment(at: segmentsFirstDeals.selectedSegmentIndex) ?? ""
-            let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
-            let totalPrice = Double(sectionNameToPrice[segmentName] ?? 0) + totalAddOnPrice
-            
-            let titleWithPrice: String
-            //        if selectedAddOnsString.isEmpty {
-            //            titleWithPrice = title
-            //        } else {
-            titleWithPrice = "\(segmentName) - (\(sectionNameToPrice[segmentName] ?? 0))"
-            //}
-            var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-            if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
-                selectedAddOns.append(selectedItemName ?? "")
-                itemIdArr.append("\(selectedItemId ?? 0)")
-                itemNameArr.append(selectedItemName ?? "")
-            }
-            else{
-                selectedAddOns.removeAll()
-                selectedAddOnPrices.removeAll()
-                itemIdArr.removeAll()
-                itemNameArr.removeAll()
-                selectedAddOns.append(selectedItemName ?? "")
-                itemIdArr.append("\(selectedItemId ?? 0)")
-                itemNameArr.append(selectedItemName ?? "")
-            }
-            let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
-            let selectedItemIdsString = itemIdArr.joined(separator: "\n")
-            let selectedItemNamesString = itemNameArr.joined(separator: "\n")
-            let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
-            let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
-            let selectedAddOnToItemIdStr = selectedAddOnToItemId.joined(separator: "\n")
-            
-            let newItem: [String: String] = [
-                "isDeals": "true",
-                "DealName": titleWithPrice,
-                "DealID": "\(self.dealId)",
-                "BasePrice": "\(sectionNameToPrice[segmentName] ?? 0)",
-                //"Title": selectedItemName ?? "",
-                "Qty": quantity,
-                "Price": "\(totalPrice)",
-                "ItemId": selectedItemIdsString,
-                "ItemName": selectedItemNamesString,
-                "AddOnId": selectedAddOnsIdsStr,
-                "SelectedAddOnsForAPI": selectedAddOnToItemIdStr,
-                "SelectedAddOnsForPrice": selectedAddOnsForPrice,
-                "SelectedAddOns": selectedAddOnsString,
-                "isAddOn": "true"
-            ]
-            if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
-                savedItems[existingSegment]["SelectedAddOns"] = "\(selectedAddOnsString)"
-                savedItems[existingSegment]["Price"] = "\(totalPrice)"
-                savedItems[existingSegment]["ItemId"] = selectedItemIdsString
-                savedItems[existingSegment]["ItemName"] = selectedItemNamesString
-                savedItems[existingSegment]["isAddOn"] = "true"
-                savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnToItemIdStr
-                savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
-                savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
-            }
-            else {
-                savedItems.append(newItem)
-            }
-            //savedItems.append(newItem)
-            UserDefaults.standard.set(savedItems, forKey: "addedItems")
-            clearSelectedAddOnIndexPaths()
-            addOnscollectionView.reloadData()
+        guard itemCount > 0 else {
+            showAlert(title: "Error", message: "Please select items to add to the order.")
+            return
         }
+        hideSubView()
+        let title = titleLbl.text ?? ""
+        let quantity = quntityLbl.text ?? ""
+        let basePriceText = subViewPriceLbl.text ?? "0.0"
+        let basePrice = Double(basePriceText) ?? 0.0
+        //var selectedAddOns: [String] = []
+        //            var selectedAddOnPrices: [Double] = []
+        for indexPath in selectedAddOnIndexPaths {
+            if let cell = addOnscollectionView.cellForItem(at: indexPath) as? AddOnDealCVCell,
+               let addOnName = cell.nameLabel.text,
+               let addOnPriceText = cell.priceLabel.text,
+               let addOnId = cell.addonId,
+               let addOnPrice = Double(addOnPriceText.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
+                let addOnInfo = "\(addOnName) (\(addOnPrice))"
+                selectedAddOns.append(addOnInfo)
+                selectedAddOnPrices.append(addOnPrice)
+                selectedAddOnsForAPI.append(addOnInfo)
+                selectedAddOnsId.append("\(addOnId)")
+                let addOnToId = "\(addOnName) \(selectedItemId ?? 0)"
+                selectedAddOnToItemId.append(addOnToId)
+            }
+        }
+        
+        let segmentName = segmentsFirstDeals.titleForSegment(at: segmentsFirstDeals.selectedSegmentIndex) ?? ""
+        let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
+        let totalPrice = Double(sectionNameToPrice[segmentName] ?? 0) + totalAddOnPrice
+        
+        let titleWithPrice: String
+        titleWithPrice = "\(segmentName) - (\(sectionNameToPrice[segmentName] ?? 0))"
+        var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
+        if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
+            selectedAddOns.append(selectedItemName ?? "")
+            itemIdArr.append("\(selectedItemId ?? 0)")
+            itemNameArr.append(selectedItemName ?? "")
+        }
+        else{
+            selectedAddOns.removeAll()
+            selectedAddOnPrices.removeAll()
+            itemIdArr.removeAll()
+            itemNameArr.removeAll()
+            selectedAddOns.append(selectedItemName ?? "")
+            itemIdArr.append("\(selectedItemId ?? 0)")
+            itemNameArr.append(selectedItemName ?? "")
+        }
+        let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
+        let selectedItemIdsString = itemIdArr.joined(separator: "\n")
+        let selectedItemNamesString = itemNameArr.joined(separator: "\n")
+        let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
+        let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
+        let selectedAddOnToItemIdStr = selectedAddOnToItemId.joined(separator: "\n")
+        
+        let newItem: [String: String] = [
+            "isDeals": "true",
+            "DealName": titleWithPrice,
+            "DealID": "\(self.dealId)",
+            "BasePrice": "\(sectionNameToPrice[segmentName] ?? 0)",
+            //"Title": selectedItemName ?? "",
+            "Qty": quantity,
+            "Price": "\(totalPrice)",
+            "ItemId": selectedItemIdsString,
+            "ItemName": selectedItemNamesString,
+            "AddOnId": selectedAddOnsIdsStr,
+            "SelectedAddOnsForAPI": selectedAddOnToItemIdStr,
+            "SelectedAddOnsForPrice": selectedAddOnsForPrice,
+            "SelectedAddOns": selectedAddOnsString,
+            "isAddOn": "true"
+        ]
+        if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
+            savedItems[existingSegment]["SelectedAddOns"] = "\(selectedAddOnsString)"
+            savedItems[existingSegment]["Price"] = "\(totalPrice)"
+            savedItems[existingSegment]["ItemId"] = selectedItemIdsString
+            savedItems[existingSegment]["ItemName"] = selectedItemNamesString
+            savedItems[existingSegment]["isAddOn"] = "true"
+            savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnToItemIdStr
+            savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
+            savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
+        }
+        else {
+            savedItems.append(newItem)
+        }
+        UserDefaults.standard.set(savedItems, forKey: "addedItems")
+        clearSelectedAddOnIndexPaths()
+        addOnscollectionView.reloadData()
+    }
     @IBAction func minusButton(_ sender: UIButton) {
         itemCount = max(1, itemCount - 1)
         updateItemCountLabel()
@@ -345,23 +338,16 @@ class DealsVC: UIViewController {
         } else {
             // Handle the case where no data is saved in UserDefaults
         }
-        // Move your API response processing logic here
         var sectionNameToID: [String: Int] = [:]
-        
-        // Check if parsedRows has enough elements
         guard self.parsedRows.count > 6 else {
             // Handle the case where parsedRows doesn't have enough elements
             return
         }
-
         let rowItemData = self.parsedRows[6]
         let addOnsItemData = self.parsedRows[7]
-        
         for dashboardModel in self.parsedRows {
             for row in dashboardModel {
                 if let rowDealID = row.dealID, let rowcategoryID = row.categoryID, rowDealID == self.dealId {
-                    // Found a match, add the categoryName to the array
-                    //                        print(dealId)
                     if let sectionName = row.categoryName {
                         if !sectionNameToID.keys.contains(sectionName) {
                             sectionNameToID[sectionName] = rowcategoryID
@@ -377,7 +363,6 @@ class DealsVC: UIViewController {
                 if let sectionID = row.dealID, let sectionName = row.dealName {
                     if !sectionNameToID.keys.contains(sectionName) {
                         sectionNameToID[sectionName] = sectionID
-                        // Add segment to segmented control
                         segmentsFirstDeals.insertSegment(withTitle: sectionName, at: segmentsFirstDeals.numberOfSegments, animated: false)
                         sectionNameToPrice[sectionName] = row.dealPrice
                     }
@@ -387,9 +372,6 @@ class DealsVC: UIViewController {
                 }
             }
         }
-        //        segmentsFirstDeals.selectedSegmentIndex = 0
-        // UI updates can be performed here
-        //DispatchQueue.main.async {
         self.apiResponse = rowItemData
         self.apiResponseAddOns = addOnsItemData
         self.segments.removeAllSegments()
@@ -400,15 +382,11 @@ class DealsVC: UIViewController {
         self.segments.selectedSegmentIndex = 0
         self.itemcollectionView.reloadData()
         self.addOnscollectionView.reloadData()
-        
-        //}
     }
     func clearSelectedCells() {
         for indexPath in selectedIndexPaths {
             if let cell = itemcollectionView.cellForItem(at: indexPath) as? DealsCVCell {
                 cell.cellView.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
-                // Clear qtyLbl
-//                cell.qtyLbl.text = nil
             }
         }
     }
@@ -438,26 +416,21 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             guard segments.selectedSegmentIndex >= 0, segments.selectedSegmentIndex < sectionNames.count else {
                 return 0
             }
-
             let selectedSectionID = sectionNameToID[sectionNames[segments.selectedSegmentIndex]] ?? -1
             let validItems = apiResponse.filter { item in
                 return item.categoryID == selectedSectionID && item.itemName != nil
             }
             return validItems.count
         } else if collectionView == addOnscollectionView {
-            // Check if selectedItemName is set
             guard let selectedItemName = selectedItemName else {
                 return 0
             }
-
             // Filter matching add-ons based on selectedItemName
             let matchingAddOns = apiResponseAddOns.filter { $0.itemName == selectedItemName && $0.adsOnName != nil }
             return matchingAddOns.count
         }
-
         return 0
     }
-
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == itemcollectionView{
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DealsCVCell", for: indexPath) as! DealsCVCell
@@ -467,22 +440,15 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
             } else {
                 cell.cellView.backgroundColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
             }
-            if let count = cellSelectionCounts[indexPath] {
-//                cell.qtyLbl.text = "Qty: \(count)"
-            }
-            
             guard segments.selectedSegmentIndex < sectionNames.count else {
                 cell.nameLabel?.text = nil
                 //                cell.priceLabel?.text = nil
                 cell.imagePath?.image = nil
-                
                 return cell
             }
             let selectedSectionID = sectionNameToID[sectionNames[segments.selectedSegmentIndex]] ?? -1
             let validItems = apiResponse.filter { item in
                 return item.categoryID == selectedSectionID && item.itemName != nil
-                //                && item.price != 0
-                //               && item.imagePath != ""
             }
             // Display item details in the cell
             if indexPath.row < validItems.count {
@@ -492,26 +458,13 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
                     cell.priceLabel?.text = "\(price)"
                 }
                 if let imagePath = item.imagePath, !imagePath.isEmpty {
-                    // If item.imagePath is not nil and not empty, set the image with the provided path
                     cell.imagePath?.setImage(with: imagePath)
                 } else {
-                    // If item.imagePath is nil or empty, set a default or "Demi" image
                     cell.imagePath?.image = #imageLiteral(resourceName: "icons8-food-64")
                 }
-                
-                //                cell.imagePath?.setImage(with: item.imagePath ?? "")
-                // Check if there are any matching add-ons
                 let matchingAddOns = apiResponseAddOns.filter { addOnItem in
                     return addOnItem.itemName == item.itemName
                 }
-//                if matchingAddOns.isEmpty {
-//                    cell.qtyLbl.isHidden = false
-//                } else {
-//                    cell.qtyLbl.isHidden = true
-//                }
-//                if let count = cellSelectionCounts[indexPath] {
-//                    cell.qtyLbl.text = "Qty: \(count)"
-//                }
             }
             return cell
         }else{
@@ -545,154 +498,153 @@ extension DealsVC:  UICollectionViewDataSource, UICollectionViewDelegateFlowLayo
         }
         return CGSize(width: 175, height: 85)
     }
-    
-    
-    
-    //collectionview didSelect in DealsVC
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            updateItemSelectedLabel()
-            if collectionView == itemcollectionView {
-                let selectedSegmentIndex = segments.selectedSegmentIndex
-                if selectedIndexPathsForSegments[selectedSegmentIndex] == nil {
-                    selectedIndexPathsForSegments[selectedSegmentIndex] = []
-                }
-                // Append the selected index path for the current segment.
-                selectedIndexPathsForSegments[selectedSegmentIndex]?.append(indexPath)
-                if cellSelectionCountsForSegments[selectedSegmentIndex] == nil {
-                    cellSelectionCountsForSegments[selectedSegmentIndex] = [:]
-                }
-                if let count = cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] {
-                    cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] = count + 1
-                } else {
-                    cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] = 1
-                }
-                hideSubView()
-                showSubView()
-                itemCount = 1
-                updateItemCountLabel()
-                selectedIndexPaths.append(indexPath)
-                selectedItemIndexPath = indexPath
-                
-                if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
-                    selectedItemName = cell.nameLabel?.text
-                    selectedItemPrice = cell.priceLabel?.text
-                    selectedItemId = cell.itemId
-                    subViewLbl.text = selectedItemName
-                    subViewPriceLbl.text = selectedItemPrice
-                    //let dealId = cell.dealId
-                    // Check if there are any matching add-ons
-                    let matchingAddOns = apiResponseAddOns.filter { addOnItem in
-                        return addOnItem.itemName == selectedItemName
-                    }
-                    
-                    if matchingAddOns.isEmpty {
-                        hideSubView()
-                        //                    let newItem: [String: String] = [
-                        //                        "itemName": selectedItemName ?? "",
-                        //                        "itemPrice": selectedItemPrice ?? "" ,
-                        //                        "itemINCV": String(itemCountinCV)
-                        //                    ]
-                        
-                        let segmentName = segmentsFirstDeals.titleForSegment(at: segmentsFirstDeals.selectedSegmentIndex) ?? ""
-                        let titleWithPrice = "\(segmentName) - (\(sectionNameToPrice[segmentName] ?? 0))"
-                        let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
-                        let totalPrice = Double(sectionNameToPrice[segmentName] ?? 0) + totalAddOnPrice
-                        var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-                        if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
-                            selectedAddOns.append(selectedItemName ?? "")
-                            itemNameArr.append(selectedItemName ?? "")
-                            itemIdArr.append("\(selectedItemId ?? 0)")
-                        }
-                        else{
-                            selectedAddOns.removeAll()
-                            selectedAddOnPrices.removeAll()
-                            itemNameArr.removeAll()
-                            itemIdArr.removeAll()
-                            selectedAddOns.append(selectedItemName ?? "")
-                            itemNameArr.append(selectedItemName ?? "")
-                            itemIdArr.append("\(selectedItemId ?? 0)")
-                        }
-                        let selectedItemIdsString = itemIdArr.joined(separator: "\n")
-                        let selectedItemNamesString = itemNameArr.joined(separator: "\n")
-                        let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
-                        
-                        let newItem: [String: String] = [
-                            "isDeals": "true",
-                            "DealID": String(dealId),
-                            "DealName": titleWithPrice ,
-                            //"Title": selectedItemName ?? "",
-                            "BasePrice": "\(sectionNameToPrice[segmentName] ?? 0)",
-                            "Price" : "\(totalPrice)",
-                            "ItemId": selectedItemIdsString,
-                            "ItemName": selectedItemNamesString,
-                            "Qty": String(itemCountinCV),
-                            "SelectedAddOns": selectedAddOnsString
-                        ]
-                        //var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-                        if let existingItemIndex = savedItems.firstIndex(where: { $0["itemName"] == selectedItemName }) {
-                            if let existingItemINCV = Int(savedItems[existingItemIndex]["itemINCV"] ?? "0") {
-                                savedItems[existingItemIndex]["itemINCV"] = String(existingItemINCV + 1)
-                            }
-                        }
-                        if let existingSegment = savedItems.firstIndex(where: {$0["isAddOn"] == "true"}){
-                            let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
-                            let selectedAddOnsForAPIStr = selectedAddOnToItemId.joined(separator: "\n")
-                            let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
-                            savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
-                            savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnsForAPIStr
-                            savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
-                        }
-                        if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
-                            savedItems[existingSegment]["SelectedAddOns"] = "\(selectedAddOnsString)"
-                            savedItems[existingSegment]["Price"] = "\(totalPrice)"
-                            savedItems[existingSegment]["ItemId"] = selectedItemIdsString
-                            savedItems[existingSegment]["ItemName"] = selectedItemNamesString
-                        }
-                        else {
-                            savedItems.append(newItem)
-                        }
-                        UserDefaults.standard.set(savedItems, forKey: "addedItems")
-                        showToast(message: "You selected: \(selectedItemName ?? "")" , duration: 3.0)
-                    } else {
-                        showSubView()
-                    }
-                    if !matchingAddOns.isEmpty {
-                        let addOnNames = matchingAddOns.compactMap { $0.adsOnName }
-                        var selectedAddOnNames: [String] = []
-                        selectedAddOnNames.append(contentsOf: addOnNames)
-                    }
-                    addOnscollectionView.reloadData()
-                }
-                selectedItemIndexPath = indexPath
-                collectionView.reloadItems(at: [indexPath])
-                if let count = cellSelectionCounts[indexPath] {
-                    cellSelectionCounts[indexPath] = count + 1
-                }
-                else {
-                    cellSelectionCounts[indexPath] = 1
-                }
-                if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
-                    if let count = cellSelectionCounts[indexPath] {
-//                        cell.qtyLbl.text = "Qty: \(count)"
-                    }
-                }
-                updateItemSelectedLabel()
-            } else if collectionView == addOnscollectionView {
-                if selectedAddOnIndexPaths.contains(indexPath) {
-                    selectedAddOnIndexPaths.remove(indexPath)
-                } else {
-                    selectedAddOnIndexPaths.insert(indexPath)
-                }
-                collectionView.reloadItems(at: [indexPath])
+        updateItemSelectedLabel()
+        if collectionView == itemcollectionView {
+            let selectedSegmentIndex = segments.selectedSegmentIndex
+            for (index, sectionName) in self.sectionNamesQTY.enumerated() {
+                       if let intValue = sectionName.extractIntFromParentheses(), index == selectedSegmentIndex {
+                           let countToSelect = min(intValue, collectionView.numberOfItems(inSection: 0))
+                           
+                           // Deselect all items first
+                           collectionView.indexPathsForSelectedItems?.forEach {
+                               collectionView.deselectItem(at: $0, animated: false)
+                           }
+                           
+                           for i in 0..<countToSelect{
+                               let itemIndexPath = IndexPath(item: i, section: 0)
+                               collectionView.selectItem(at: itemIndexPath, animated: true, scrollPosition: .centeredHorizontally)
+                               print("Selected item at indexPath: \(itemIndexPath)")
+                               // Only select items up to the specified indexPath
+                               if itemIndexPath == indexPath {
+                                   break
+                               }
+                           }
+                           
+                           // Debug print to check selected items after the loop
+                           collectionView.indexPathsForSelectedItems?.forEach {
+                               print("Selected item at indexPath: \($0)")
+                           }
+                       }
+                   }
+            if selectedIndexPathsForSegments[selectedSegmentIndex] == nil {
+                selectedIndexPathsForSegments[selectedSegmentIndex] = []
             }
+            // Append the selected index path for the current segment.
+            selectedIndexPathsForSegments[selectedSegmentIndex]?.append(indexPath)
+            if cellSelectionCountsForSegments[selectedSegmentIndex] == nil {
+                cellSelectionCountsForSegments[selectedSegmentIndex] = [:]
+            }
+            if let count = cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] {
+                cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] = count + 1
+            } else {
+                cellSelectionCountsForSegments[selectedSegmentIndex]?[indexPath] = 1
+            }
+            hideSubView()
+            showSubView()
+            itemCount = 1
+            updateItemCountLabel()
+            selectedIndexPaths.append(indexPath)
+            selectedItemIndexPath = indexPath
+            
+            if let cell = collectionView.cellForItem(at: indexPath) as? DealsCVCell {
+                selectedItemName = cell.nameLabel?.text
+                selectedItemPrice = cell.priceLabel?.text
+                selectedItemId = cell.itemId
+                subViewLbl.text = selectedItemName
+                subViewPriceLbl.text = selectedItemPrice
+                let matchingAddOns = apiResponseAddOns.filter { addOnItem in
+                    return addOnItem.itemName == selectedItemName
+                }
+                if matchingAddOns.isEmpty {
+                    hideSubView()
+                    let segmentName = segmentsFirstDeals.titleForSegment(at: segmentsFirstDeals.selectedSegmentIndex) ?? ""
+                    let titleWithPrice = "\(segmentName) - (\(sectionNameToPrice[segmentName] ?? 0))"
+                    let totalAddOnPrice = selectedAddOnPrices.reduce(0, +)
+                    let totalPrice = Double(sectionNameToPrice[segmentName] ?? 0) + totalAddOnPrice
+                    var savedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
+                    if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
+                        selectedAddOns.append(selectedItemName ?? "")
+                        itemNameArr.append(selectedItemName ?? "")
+                        itemIdArr.append("\(selectedItemId ?? 0)")
+                    }
+                    else{
+                        selectedAddOns.removeAll()
+                        selectedAddOnPrices.removeAll()
+                        itemNameArr.removeAll()
+                        itemIdArr.removeAll()
+                        selectedAddOns.append(selectedItemName ?? "")
+                        itemNameArr.append(selectedItemName ?? "")
+                        itemIdArr.append("\(selectedItemId ?? 0)")
+                    }
+                    let selectedItemIdsString = itemIdArr.joined(separator: "\n")
+                    let selectedItemNamesString = itemNameArr.joined(separator: "\n")
+                    let selectedAddOnsString = selectedAddOns.joined(separator: "\n")
+                    
+                    let newItem: [String: String] = [
+                        "isDeals": "true",
+                        "DealID": String(dealId),
+                        "DealName": titleWithPrice ,
+                        //"Title": selectedItemName ?? "",
+                        "BasePrice": "\(sectionNameToPrice[segmentName] ?? 0)",
+                        "Price" : "\(totalPrice)",
+                        "ItemId": selectedItemIdsString,
+                        "ItemName": selectedItemNamesString,
+                        "Qty": String(itemCountinCV),
+                        "SelectedAddOns": selectedAddOnsString
+                    ]
+                    if let existingItemIndex = savedItems.firstIndex(where: { $0["itemName"] == selectedItemName }) {
+                        if let existingItemINCV = Int(savedItems[existingItemIndex]["itemINCV"] ?? "0") {
+                            savedItems[existingItemIndex]["itemINCV"] = String(existingItemINCV + 1)
+                        }
+                    }
+                    if let existingSegment = savedItems.firstIndex(where: {$0["isAddOn"] == "true"}){
+                        let selectedAddOnsIdsStr = selectedAddOnsId.joined(separator: "\n")
+                        let selectedAddOnsForAPIStr = selectedAddOnToItemId.joined(separator: "\n")
+                        let selectedAddOnsForPrice = selectedAddOnsForAPI.joined(separator: "\n")
+                        savedItems[existingSegment]["AddOnId"] = selectedAddOnsIdsStr
+                        savedItems[existingSegment]["SelectedAddOnsForAPI"] = selectedAddOnsForAPIStr
+                        savedItems[existingSegment]["SelectedAddOnsForPrice"] = selectedAddOnsForPrice
+                    }
+                    if let existingSegment = savedItems.firstIndex(where: {$0["DealName"] == titleWithPrice}){
+                        savedItems[existingSegment]["SelectedAddOns"] = "\(selectedAddOnsString)"
+                        savedItems[existingSegment]["Price"] = "\(totalPrice)"
+                        savedItems[existingSegment]["ItemId"] = selectedItemIdsString
+                        savedItems[existingSegment]["ItemName"] = selectedItemNamesString
+                    }
+                    else {
+                        savedItems.append(newItem)
+                    }
+                    UserDefaults.standard.set(savedItems, forKey: "addedItems")
+                    showToast(message: "You selected: \(selectedItemName ?? "")" , duration: 3.0)
+                } else {
+                    showSubView()
+                }
+                if !matchingAddOns.isEmpty {
+                    let addOnNames = matchingAddOns.compactMap { $0.adsOnName }
+                    var selectedAddOnNames: [String] = []
+                    selectedAddOnNames.append(contentsOf: addOnNames)
+                }
+                addOnscollectionView.reloadData()
+            }
+            selectedItemIndexPath = indexPath
+            collectionView.reloadItems(at: [indexPath])
+            if let count = cellSelectionCounts[indexPath] {
+                cellSelectionCounts[indexPath] = count + 1
+            }
+            else {
+                cellSelectionCounts[indexPath] = 1
+            }
+            updateItemSelectedLabel()
+        } else if collectionView == addOnscollectionView {
+            if selectedAddOnIndexPaths.contains(indexPath) {
+                selectedAddOnIndexPaths.remove(indexPath)
+            } else {
+                selectedAddOnIndexPaths.insert(indexPath)
+            }
+            collectionView.reloadItems(at: [indexPath])
         }
-    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        // Add your custom logic here to decide whether the item should be selectable
-     
-        return true
     }
-
 }
 extension String {
     func extractIntFromParentheses() -> Int? {
@@ -713,5 +665,10 @@ extension String {
         }
 
         return nil
+    }
+}
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

@@ -159,7 +159,7 @@ class DineInVC: UIViewController{
         cellSelectionCounts.removeAll()
         if let indexPaths = selectedIndexPathsForSegments[selectedSegmentIndex] {
             selectedIndexPaths.append(contentsOf: indexPaths)
-            itemcollectionView.reloadItems(at: indexPaths)
+//            itemcollectionView.reloadItems(at: indexPaths)
         }
         if let cellCounts = cellSelectionCountsForSegments[selectedSegmentIndex] {
                 cellSelectionCounts = cellCounts
