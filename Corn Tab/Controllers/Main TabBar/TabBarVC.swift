@@ -186,6 +186,7 @@ class TabBarVC: UIViewController {
             let orderIDA = dataSource[sender.tag].orderID
             let tabBarController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "HomeTabBar") as? UITabBarController
             if let nextViewController = tabBarController?.viewControllers?[2] as? OrderDetailsVC {
+                nextViewController.isDeleteButtonHidden = true
                 nextViewController.updatedButtonText = "Update Order"
                 // Convert Int to String before assignment
                 nextViewController.orderID = String(orderIDA)

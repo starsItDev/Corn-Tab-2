@@ -33,6 +33,7 @@ class OrderDetailsVC: UIViewController {
     var taxAmount: Double?
     var subtotalPrice: Double?
     var orderID: String?
+    var isDeleteButtonHidden: Bool = false
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -228,12 +229,23 @@ extension OrderDetailsVC: UITableViewDelegate, UITableViewDataSource {
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! OrderDetailsTVCell
-        cell.deleteCellBtn.tag = indexPath.row
-        cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
+        // Check if the delete button should be hidden
+            if isDeleteButtonHidden {
+                cell.deleteCellBtn.isHidden = true
+            } else {
+                cell.deleteCellBtn.isHidden = false
+                cell.deleteCellBtn.tag = indexPath.row
+                cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
+            }
         cell.plusbtn.tag = indexPath.row
         cell.plusbtn.addTarget(self, action: #selector(plusBtnTapped(sender:)), for: .touchUpInside)
-        cell.minBtn.tag = indexPath.row
-        cell.minBtn.addTarget(self, action: #selector(minBtnTapped(sender:)), for: .touchUpInside)
+        if isDeleteButtonHidden {
+            cell.minBtn.isHidden = true
+        }else{
+            cell.minBtn.isHidden = false
+            cell.minBtn.tag = indexPath.row
+            cell.minBtn.addTarget(self, action: #selector(minBtnTapped(sender:)), for: .touchUpInside)
+        }
         cell.eidtBtn.addTarget(self, action: #selector(eidtBtnTapped(sender:)), for: .touchUpInside)
         let item = addedItems[indexPath.row]
         if let isDeals = item["isDeals"], !isDeals.isEmpty{
