@@ -323,10 +323,12 @@ extension OrderDetailsVC {
         var ordersArray = [[String: Any]]()
         
         var orderDict = [String: Any]()
-        //              orderDict["OrderID"] = "temp#1695381299092"
-        //              orderDict["OrderID"] = orderID
-        if ((orderID?.isEmpty) != nil) {
-            orderDict["OrderID"] = orderID
+        if let orderID = orderID, !orderID.isEmpty {
+            if let orderIDDouble = Double(orderID) {
+                let orderidint = Int(orderIDDouble)
+                orderDict["OrderID"] = orderidint
+                print(orderidint)
+            }
         } else {
             orderDict["OrderID"] = "temp#1695381299092"
         }
@@ -409,8 +411,8 @@ extension OrderDetailsVC {
                 itemDict.removeAll()
                 itemDict["ID"] = Int(item["ID"] ?? "")
                 itemDict["Name"] = item["Title"]
-                itemDict["Price"] = Double(item["BasePrice"] ?? "")
-                itemDict["Qty"] = quantityCount
+                itemDict["Price"] = Double(item["Price"] ?? "")
+                itemDict["Qty"] = Int(item["Qty"] ?? "")
                 itemDict["Discount"] = 0
                 itemDict["IsUnGroup"] = false
                 itemDict["SectionName"] = "Kitchen"

@@ -3,4 +3,118 @@
    uuid = "34A42D27-1F7E-45F8-BC3A-368C3876571C"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7B9220B0-0628-4DC4-811C-111A22BD484F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Corn Tab/Controllers/DashBoard TabBar/SelectionVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "136"
+            endingLineNumber = "136"
+            landmarkName = "collectionView(_:numberOfItemsInSection:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "7B9220B0-0628-4DC4-811C-111A22BD484F - 21fea3213250a0ed"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Corn_Tab.SelectionVC.collectionView(_: __C.UICollectionView, numberOfItemsInSection: Swift.Int) -&gt; Swift.Int"
+                  moduleName = "Corn Tab"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/starsdev/Desktop/Corn%20Tab%202/Corn%20Tab/Controllers/DashBoard%20TabBar/SelectionVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "136"
+                  endingLineNumber = "136"
+                  offsetFromSymbolStart = "887">
+               </Location>
+               <Location
+                  uuid = "7B9220B0-0628-4DC4-811C-111A22BD484F - f4d992ac354663e2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Corn_Tab.MasterDetailRow) -&gt; Swift.Bool in Corn_Tab.SelectionVC.collectionView(_: __C.UICollectionView, numberOfItemsInSection: Swift.Int) -&gt; Swift.Int"
+                  moduleName = "Corn Tab"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/starsdev/Desktop/Corn%20Tab%202/Corn%20Tab/Controllers/DashBoard%20TabBar/SelectionVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "137"
+                  endingLineNumber = "137"
+                  offsetFromSymbolStart = "6431">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "652BFE49-13AE-44D0-8C50-8B08749EAB0D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Corn Tab/Controllers/DashBoard TabBar/SelectionVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "155"
+            endingLineNumber = "155"
+            landmarkName = "collectionView(_:cellForItemAt:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F6FD98E4-B818-4AE2-9315-7A8445E8BD65"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Corn Tab/Controllers/DashBoard TabBar/SelectionVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "159"
+            endingLineNumber = "159"
+            landmarkName = "collectionView(_:cellForItemAt:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "F6FD98E4-B818-4AE2-9315-7A8445E8BD65 - 68f31d1ac98e6052"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Corn_Tab.SelectionVC.collectionView(_: __C.UICollectionView, cellForItemAt: Foundation.IndexPath) -&gt; __C.UICollectionViewCell"
+                  moduleName = "Corn Tab"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/starsdev/Desktop/Corn%20Tab%202/Corn%20Tab/Controllers/DashBoard%20TabBar/SelectionVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "159"
+                  endingLineNumber = "159"
+                  offsetFromSymbolStart = "1276">
+               </Location>
+               <Location
+                  uuid = "F6FD98E4-B818-4AE2-9315-7A8445E8BD65 - 58aa77d95615d4f1"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Corn_Tab.MasterDetailRow) -&gt; Swift.Bool in Corn_Tab.SelectionVC.collectionView(_: __C.UICollectionView, cellForItemAt: Foundation.IndexPath) -&gt; __C.UICollectionViewCell"
+                  moduleName = "Corn Tab"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/starsdev/Desktop/Corn%20Tab%202/Corn%20Tab/Controllers/DashBoard%20TabBar/SelectionVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "160"
+                  endingLineNumber = "160"
+                  offsetFromSymbolStart = "81">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

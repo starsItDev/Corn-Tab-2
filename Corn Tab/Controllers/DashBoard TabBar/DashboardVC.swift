@@ -18,6 +18,8 @@ class DashboardVC: UIViewController {
             if let tabBarController = self.tabBarController {
                 // Set the index of the tab you want to select
                 tabBarController.selectedIndex = 2
+                UserDefaults.standard.removeObject(forKey: "TableContent")
+
             }
         }
     }
