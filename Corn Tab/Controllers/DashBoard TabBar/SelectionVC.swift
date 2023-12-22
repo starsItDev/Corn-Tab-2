@@ -138,16 +138,6 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
         }
         return validItems.count
     }
-//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        guard segments.selectedSegmentIndex < sectionNames.count else {
-//            return 0
-//        }
-//        let selectedSectionID = sectionNameToID[sectionNames[segments.selectedSegmentIndex]] ?? -1
-//        let validItems = apiResponse.filter { item in
-//            return item.floorID == selectedSectionID && (item.tableNo != nil)
-//        }
-//        return validItems.count
-//    }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! SelectionCVCell
         let selectedSectionIndex = segments.selectedSegmentIndex
@@ -159,23 +149,20 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
             let sectionItems = apiResponse.filter { item in
                 if let itemCategoryID = item.floorID {
                     return itemCategoryID == selectedSectionID
+                    && (item.tableNo != nil)
+                    && !receivedTableIDs.contains("\(item.tableID ?? 0)")
                 }
                 return false
             }
             // Check if indexPath.row is within bounds of sectionItems
             if indexPath.row < sectionItems.count {
                 let item = sectionItems[indexPath.row]
-                if !receivedTableIDs.contains("\(item.tableID ?? 0)"){
-                    cell.tableNumberLbl?.text = item.tableNo
+                 cell.tableNumberLbl?.text = item.tableNo
+                if selectedIndexPaths.contains(indexPath) {
+                    cell.cellView.backgroundColor = #colorLiteral(red: 0.8596192002, green: 0.3426481783, blue: 0.2044148147, alpha: 1)
+                } else {
+                    cell.cellView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
                 }
-                if receivedTableIDs.contains("\(item.tableID ?? 0)"){
-//                    print(item.tableNo)
-                }
-            }
-            if selectedIndexPaths.contains(indexPath) {
-                cell.cellView.backgroundColor = #colorLiteral(red: 0.8596192002, green: 0.3426481783, blue: 0.2044148147, alpha: 1)
-            } else {
-                cell.cellView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
             }
         }
         return cell
@@ -196,6 +183,8 @@ extension SelectionVC: UICollectionViewDataSource, UICollectionViewDelegateFlowL
                     let sectionItems = apiResponse.filter { item in
                         if let itemCategoryID = item.floorID {
                             return itemCategoryID == selectedSectionID
+                            && (item.tableNo != nil)
+                            && !receivedTableIDs.contains("\(item.tableID ?? 0)")
                         }
                         return false
                     }

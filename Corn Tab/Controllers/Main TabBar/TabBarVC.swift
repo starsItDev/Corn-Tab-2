@@ -39,9 +39,19 @@ class TabBarVC: UIViewController {
         super.viewDidLoad()
         tabBar.delegate = self
         tableView.isHidden = true
-        attendNameLbl.text = userName
+//        attendNameLbl.text = userName
+        if let username = UserDefaults.standard.string(forKey: "UserName") {
+            attendNameLbl.text = username
+        }
+//        if let DistributionName = UserDefaults.standard.string(forKey: "DistributionName") {
+//            loactionLbl.text = DistributionName
+//        }
+        if let WorkingDate = UserDefaults.standard.string(forKey: "WorkingDate") {
+            dateLbl.text = WorkingDate
+        }
+       
         loactionLbl.text = distributionName
-        dateLbl.text =  workingDate
+//        dateLbl.text =  workingDate
         print(workingDate)
         UserDefaults.standard.set(workingDate, forKey: "savedWorkingDate")
         startTimer()
@@ -52,8 +62,18 @@ class TabBarVC: UIViewController {
         makePOSTRequest()
     }
     override func viewWillAppear(_ animated: Bool) {
-        makePOSTRequest()
-    }
+            super.viewWillAppear(animated)
+            makePOSTRequest()
+        }
+
+       override func viewDidAppear(_ animated: Bool) {
+           super.viewDidAppear(animated)
+           makePOSTRequest()
+       }
+    func refreshTabBarVC() {
+            makePOSTRequest() // Refresh your data or perform any necessary actions
+        }
+
     @objc func refreshData() {
         // Perform your data refresh logic here, for example, make the POST request again
         makePOSTRequest()
@@ -173,6 +193,7 @@ class TabBarVC: UIViewController {
                              "Time": String(dateTime?[1] ?? ""),
                              "isEdit": "\(true)"
                          ]
+                         UserDefaults.standard.set(tableID, forKey: "SelectedTableIDs")
                          UserDefaults.standard.set(newItem, forKey: "TableContent")
                      }
                  } catch{
@@ -469,6 +490,7 @@ extension TabBarVC:UITabBarControllerDelegate ,UITabBarDelegate {
  
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if tabBarController.selectedIndex == 0 {
+            makePOSTRequest()
             let addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
 
             if addedItems.isEmpty {

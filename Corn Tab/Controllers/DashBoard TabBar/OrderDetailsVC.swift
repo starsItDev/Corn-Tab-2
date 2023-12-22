@@ -48,179 +48,179 @@ class OrderDetailsVC: UIViewController {
         placeOrderBtn.setTitle(buttonText, for: .normal)
     }
     override func viewWillAppear(_ animated: Bool) {
-            addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
-            itemCounts = addedItems.compactMap { Int($0["Qty"] ?? "0") }
-            tableView.reloadData()
-            calculateAndUpdateTotal()
-            orderProductLbl.text = " \(addedItems.count)"
-            if let tableNumber = tableNumberText {
-                tableNoLbl.text = tableNumber
-            }
-            if let coverTable = coverTableText {
-                tableCoverNoLbl.text = coverTable
-            }
-            if let tableContent = UserDefaults.standard.dictionary(forKey: "TableContent"){
-                let isEdit = tableContent["isEdit"] as? String
-                if isEdit == "true"{
-                    if let tableName = tableContent["TableName"] as? String {
-                        tableNoLbl.text = "  \(tableName)"
-                    }
-                    if let tableCover = tableContent["TableCover"] as? String {
-                        tableCoverNoLbl.text = tableCover
-                    }
-                    if let orderNo = tableContent["OrderNo"] as? String{
-                        orderNoLbl.text = orderNo
-                    }
-                    if  let time = tableContent["Time"] as? String{
-                        let dateFormatter = DateFormatter()
-                        dateFormatter.dateFormat = "HH:mm:ss.SSS"
-                        if let newTime = dateFormatter.date(from: time){
-                            dateFormatter.dateFormat = "h:mm a"
-                            if let formatedTime = dateFormatter.string(for: newTime) {
-                                timeLbl.text = formatedTime
-                            } else {
-                                print("Failed to format time.")
-                            }
+        addedItems = UserDefaults.standard.array(forKey: "addedItems") as? [[String: String]] ?? []
+        itemCounts = addedItems.compactMap { Int($0["Qty"] ?? "0") }
+        tableView.reloadData()
+        calculateAndUpdateTotal()
+        orderProductLbl.text = " \(addedItems.count)"
+        if let tableNumber = tableNumberText {
+            tableNoLbl.text = tableNumber
+        }
+        if let coverTable = coverTableText {
+            tableCoverNoLbl.text = coverTable
+        }
+        if let tableContent = UserDefaults.standard.dictionary(forKey: "TableContent"){
+            let isEdit = tableContent["isEdit"] as? String
+            if isEdit == "true"{
+                if let tableName = tableContent["TableName"] as? String {
+                    tableNoLbl.text = "  \(tableName)"
+                }
+                if let tableCover = tableContent["TableCover"] as? String {
+                    tableCoverNoLbl.text = tableCover
+                }
+                if let orderNo = tableContent["OrderNo"] as? String{
+                    orderNoLbl.text = orderNo
+                }
+                if  let time = tableContent["Time"] as? String{
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "HH:mm:ss.SSS"
+                    if let newTime = dateFormatter.date(from: time){
+                        dateFormatter.dateFormat = "h:mm a"
+                        if let formatedTime = dateFormatter.string(for: newTime) {
+                            timeLbl.text = formatedTime
+                        } else {
+                            print("Failed to format time.")
                         }
                     }
                 }
             }
         }
+    }
     // MARK: - Button Action
-      @IBAction func placeOrderTap(_ sender: UIButton) {
-          if addedItems.isEmpty {
-              showAlert(
-                  title: "No Items",
-                  message: "Please add items to your order before placing an order."
-              )
-          } else if tableNoLbl.text == "" && tableCoverNoLbl.text == "" {
-              // Use your custom showAlert method to display the alert
-              showAlert(
-                  title: "Missing Table Or TableCover",
-                  message: "Please Select Table And Select Cover Table Number."
-              )
-          } else {
-              print("Next")
-              makePOSTRequest()
-          }
-      }
-      // MARK: - Private Methods
+    @IBAction func placeOrderTap(_ sender: UIButton) {
+        if addedItems.isEmpty {
+            showAlert(
+                title: "No Items",
+                message: "Please add items to your order before placing an order."
+            )
+        } else if tableNoLbl.text == "" && tableCoverNoLbl.text == "" {
+            // Use your custom showAlert method to display the alert
+            showAlert(
+                title: "Missing Table Or TableCover",
+                message: "Please Select Table And Select Cover Table Number."
+            )
+        } else {
+            print("Next")
+            makePOSTRequest()
+        }
+    }
+    // MARK: - Private Methods
     private func updateDateAndTimeLabels() {
         let currentDate = Date()
         
-//        // Format date
+        //        // Format date
         let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "dd-MM-yyyy"
-//        let formattedDate = dateFormatter.string(from: currentDate)
-//        dateLbl.text = formattedDate
+        //        dateFormatter.dateFormat = "dd-MM-yyyy"
+        //        let formattedDate = dateFormatter.string(from: currentDate)
+        //        dateLbl.text = formattedDate
         // Retrieve workingDate from UserDefaults
         if let savedWorkingDate = UserDefaults.standard.value(forKey: "savedWorkingDate") as? String {
             dateLbl.text = savedWorkingDate
         }
-
+        
         // Format time
         dateFormatter.dateFormat = "h:mm a"
         let formattedTime = dateFormatter.string(from: currentDate)
         timeLbl.text = formattedTime
     }
-      @objc func eidtBtnTapped(sender: UIButton) {
-          guard let tabBarController = self.tabBarController else {
-              return
-          }
-          let currentIndex = tabBarController.selectedIndex
-          let nextIndex = (currentIndex + 1) % tabBarController.viewControllers!.count
-          tabBarController.selectedIndex = nextIndex
-      }
-      @objc func deleteBtnTapped(sender: UIButton) {
-          let indexPath = IndexPath(row: sender.tag, section: 0)
-          guard indexPath.row < itemCounts.count else {
-              return
-          }
-          let alertController = UIAlertController(
-              title: "Confirm Delete",
-              message: "Are you sure you want to delete this item?",
-              preferredStyle: .alert
-          )
-          let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-          alertController.addAction(cancelAction)
-          let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
-              guard let self = self else { return }
-              // Perform deletion action here
-              if indexPath.row < self.addedItems.count {
-                  self.addedItems.remove(at: indexPath.row)
-                  // Remove the corresponding item from itemCounts array
-                  self.itemCounts.remove(at: indexPath.row)
-                  // Save the updated addedItems array to UserDefaults
-                  UserDefaults.standard.set(self.addedItems, forKey: "addedItems")
-                  self.tableView.beginUpdates()
-                  self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                  self.tableView.endUpdates()
-                  self.calculateAndUpdateTotal()
-                  self.tableView.reloadData()
-                  self.orderProductLbl.text = " \(self.addedItems.count)"
-              }
-          }
-          alertController.addAction(deleteAction)
-          present(alertController, animated: true, completion: nil)
-      }
-      @objc func plusBtnTapped(sender: UIButton) {
-          let point = sender.convert(CGPoint.zero, to: tableView)
-          if let indexPath = tableView.indexPathForRow(at: point) {
-              if var quantity = Int(addedItems[indexPath.row]["Qty"] ?? "") {
-                  quantity += 1
-                  addedItems[indexPath.row]["Qty"] = String(quantity)
-                  calculateAndUpdateTotal()
-                  tableView.reloadRows(at: [indexPath], with: .none)
-                  UserDefaults.standard.set(addedItems, forKey: "addedItems")
-              } else if var itemINCV = Int(addedItems[indexPath.row]["itemINCV"] ?? "") {
-                  itemINCV += 1
-                  addedItems[indexPath.row]["itemINCV"] = String(itemINCV)
-                  calculateAndUpdateTotal()
-                  tableView.reloadRows(at: [indexPath], with: .none)
-                  UserDefaults.standard.set(addedItems, forKey: "addedItems")
-              }
-          }
-      }
-      @objc func minBtnTapped(sender: UIButton) {
-          let point = sender.convert(CGPoint.zero, to: tableView)
-          if let indexPath = tableView.indexPathForRow(at: point) {
-              if var quantity = Int(addedItems[indexPath.row]["Qty"] ?? ""),
-                 quantity > 0 {
-                  quantity -= 1
-                  addedItems[indexPath.row]["Qty"] = String(quantity)
-                  calculateAndUpdateTotal()
-                  tableView.reloadRows(at: [indexPath], with: .none)
-                  UserDefaults.standard.set(addedItems, forKey: "addedItems")
-              } else if var itemINCV = Int(addedItems[indexPath.row]["itemINCV"] ?? ""),
-                        itemINCV > 0 {
-                  itemINCV -= 1
-                  addedItems[indexPath.row]["itemINCV"] = String(itemINCV)
-                  calculateAndUpdateTotal()
-                  tableView.reloadRows(at: [indexPath], with: .none)
-                  UserDefaults.standard.set(addedItems, forKey: "addedItems")
-              }
-          }
-      }
-      private func calculateAndUpdateTotal() {
-          self.subtotalPrice = addedItems.reduce(0.0) { result, item in
-              let priceKey = item["Price"] != nil ? "Price" : "Price"
-              let quantityKey = item["Qty"] != nil ? "Qty" : "Qty"
-              let price = Double(item[priceKey] ?? "0") ?? 0.0
-              let quantity = Int(item[quantityKey] ?? "0") ?? 0
-              return result + (price * Double(quantity))
-          }
-          let taxPercentage: Double = 0.16
-          self.taxAmount = (subtotalPrice ?? 0) * taxPercentage
-          let totalPrice = (subtotalPrice ?? 0) + (taxAmount ?? 0)
-          let numberFormatter = NumberFormatter()
-          numberFormatter.numberStyle = .decimal
-          numberFormatter.minimumFractionDigits = 2
-          subTotalLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: subtotalPrice ?? 0)) ?? "")
-          taxIncludedLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: taxAmount ?? 0)) ?? "")
-          totalLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: totalPrice)) ?? "")
-          
-      }
-  }
+    @objc func eidtBtnTapped(sender: UIButton) {
+        guard let tabBarController = self.tabBarController else {
+            return
+        }
+        let currentIndex = tabBarController.selectedIndex
+        let nextIndex = (currentIndex + 1) % tabBarController.viewControllers!.count
+        tabBarController.selectedIndex = nextIndex
+    }
+    @objc func deleteBtnTapped(sender: UIButton) {
+        let indexPath = IndexPath(row: sender.tag, section: 0)
+        guard indexPath.row < itemCounts.count else {
+            return
+        }
+        let alertController = UIAlertController(
+            title: "Confirm Delete",
+            message: "Are you sure you want to delete this item?",
+            preferredStyle: .alert
+        )
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            // Perform deletion action here
+            if indexPath.row < self.addedItems.count {
+                self.addedItems.remove(at: indexPath.row)
+                // Remove the corresponding item from itemCounts array
+                self.itemCounts.remove(at: indexPath.row)
+                // Save the updated addedItems array to UserDefaults
+                UserDefaults.standard.set(self.addedItems, forKey: "addedItems")
+                self.tableView.beginUpdates()
+                self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                self.tableView.endUpdates()
+                self.calculateAndUpdateTotal()
+                self.tableView.reloadData()
+                self.orderProductLbl.text = " \(self.addedItems.count)"
+            }
+        }
+        alertController.addAction(deleteAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    @objc func plusBtnTapped(sender: UIButton) {
+        let point = sender.convert(CGPoint.zero, to: tableView)
+        if let indexPath = tableView.indexPathForRow(at: point) {
+            if var quantity = Int(addedItems[indexPath.row]["Qty"] ?? "") {
+                quantity += 1
+                addedItems[indexPath.row]["Qty"] = String(quantity)
+                calculateAndUpdateTotal()
+                tableView.reloadRows(at: [indexPath], with: .none)
+                UserDefaults.standard.set(addedItems, forKey: "addedItems")
+            } else if var itemINCV = Int(addedItems[indexPath.row]["itemINCV"] ?? "") {
+                itemINCV += 1
+                addedItems[indexPath.row]["itemINCV"] = String(itemINCV)
+                calculateAndUpdateTotal()
+                tableView.reloadRows(at: [indexPath], with: .none)
+                UserDefaults.standard.set(addedItems, forKey: "addedItems")
+            }
+        }
+    }
+    @objc func minBtnTapped(sender: UIButton) {
+        let point = sender.convert(CGPoint.zero, to: tableView)
+        if let indexPath = tableView.indexPathForRow(at: point) {
+            if var quantity = Int(addedItems[indexPath.row]["Qty"] ?? ""),
+               quantity > 0 {
+                quantity -= 1
+                addedItems[indexPath.row]["Qty"] = String(quantity)
+                calculateAndUpdateTotal()
+                tableView.reloadRows(at: [indexPath], with: .none)
+                UserDefaults.standard.set(addedItems, forKey: "addedItems")
+            } else if var itemINCV = Int(addedItems[indexPath.row]["itemINCV"] ?? ""),
+                      itemINCV > 0 {
+                itemINCV -= 1
+                addedItems[indexPath.row]["itemINCV"] = String(itemINCV)
+                calculateAndUpdateTotal()
+                tableView.reloadRows(at: [indexPath], with: .none)
+                UserDefaults.standard.set(addedItems, forKey: "addedItems")
+            }
+        }
+    }
+    private func calculateAndUpdateTotal() {
+        self.subtotalPrice = addedItems.reduce(0.0) { result, item in
+            let priceKey = item["Price"] != nil ? "Price" : "Price"
+            let quantityKey = item["Qty"] != nil ? "Qty" : "Qty"
+            let price = Double(item[priceKey] ?? "0") ?? 0.0
+            let quantity = Int(item[quantityKey] ?? "0") ?? 0
+            return result + (price * Double(quantity))
+        }
+        let taxPercentage: Double = 0.16
+        self.taxAmount = (subtotalPrice ?? 0) * taxPercentage
+        let totalPrice = (subtotalPrice ?? 0) + (taxAmount ?? 0)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 2
+        subTotalLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: subtotalPrice ?? 0)) ?? "")
+        taxIncludedLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: taxAmount ?? 0)) ?? "")
+        totalLbl.text = "Rs: " + (numberFormatter.string(from: NSNumber(value: totalPrice)) ?? "")
+        
+    }
+}
 
 // MARK: - TableView Delegate and DataSource
 extension OrderDetailsVC: UITableViewDelegate, UITableViewDataSource {
@@ -230,13 +230,13 @@ extension OrderDetailsVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! OrderDetailsTVCell
         // Check if the delete button should be hidden
-            if isDeleteButtonHidden {
-                cell.deleteCellBtn.isHidden = true
-            } else {
-                cell.deleteCellBtn.isHidden = false
-                cell.deleteCellBtn.tag = indexPath.row
-                cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
-            }
+        if isDeleteButtonHidden {
+            cell.deleteCellBtn.isHidden = true
+        } else {
+            cell.deleteCellBtn.isHidden = false
+            cell.deleteCellBtn.tag = indexPath.row
+            cell.deleteCellBtn.addTarget(self, action: #selector(deleteBtnTapped(sender:)), for: .touchUpInside)
+        }
         cell.plusbtn.tag = indexPath.row
         cell.plusbtn.addTarget(self, action: #selector(plusBtnTapped(sender:)), for: .touchUpInside)
         if isDeleteButtonHidden {
@@ -335,13 +335,16 @@ extension OrderDetailsVC {
         orderDict["ServiceTypeID"] = 1
         let userid = UserDefaults.standard.integer(forKey: "UserId")
         orderDict["UserID"] = userid
-        orderDict["TableID"] = selectedTableID
+        orderDict["TableID"] = Int(selectedTableID ?? "")
         orderDict["GrossAmount"] = self.subtotalPrice
         orderDict["GSTAmount"] = self.taxAmount
         orderDict["GSTPer"] = 16
         orderDict["ItemWiseDiscount"] = 0
         orderDict["IsHold"] = 1
-        orderDict["CoverTable"] = coverTableText
+        //        orderDict["CoverTable"] = coverTableText
+        if let coverTableText = tableCoverNoLbl.text {
+            orderDict["CoverTable"] = coverTableText
+        }
         var itemsArray = [[String: Any]]()
         var itemDict = [String: Any]()
         
@@ -439,7 +442,6 @@ extension OrderDetailsVC {
                     itemDict["AddOns"] = addOnArr
                 }
             }
-            
             modifierParentRowID += 1
             itemsArray.append(itemDict)
         }
@@ -485,23 +487,23 @@ extension OrderDetailsVC {
             if let responseString = String(data: data, encoding: .utf8) {
                 //                      print("Response: \(responseString)")
                 DispatchQueue.main.async {
-                    //                         self.showAlert(title: "Alert", message: "Send Resquest")
-                    let storyboard = UIStoryboard(name: "Main", bundle: nil) // Replace "Main" with your storyboard name
-                    if let nextViewController = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as? TabBarVC {
-                        self.navigationController?.pushViewController(nextViewController, animated: true)
-                    }
+                    self.dismiss(animated: true, completion: {
+                        if self.tabBarController != nil {
+                            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                            if let nextViewController = storyboard.instantiateViewController(withIdentifier: "TabBarVC") as? TabBarVC {
+                                self.navigationController?.pushViewController(nextViewController, animated: true)
+                            }
+                        }
+                    })
                 }
             }
-
         }
         task.resume()
     }
-    
     func separateAlphabetsAndNumbers(from addonName: String?) -> (alphabets: String, numbers: String) {
         guard let addonName = addonName else {
             return ("", "")
         }
-        
         var alphabets = ""
         var numbers = ""
         
@@ -512,7 +514,6 @@ extension OrderDetailsVC {
                 numbers.append(char)
             }
         }
-        
         return (alphabets, numbers)
     }
 }
